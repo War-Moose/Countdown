@@ -152,11 +152,24 @@
         const val = taskLog[key] || 0;
 
         if (val >= defaultTasks) {
-          tempStreak++;
-          if (date.toISOString().split("T")[0] === today) {
-            currentStreak = tempStreak;
-          }
-        } else {
+        tempStreak++;
+        if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
+      } else {
+        tempStreak = 0;
+      }
+
+      const todayVal = taskLog[today] || 0;
+      if (todayVal >= defaultTasks) {
+        let countBack = 0;
+        for (let d = new Date(today); d.getMonth() === month && d.getDate() > 0; d.setDate(d.getDate() - 1)) {
+          const k = d.toISOString().split("T")[0];
+          if ((taskLog[k] || 0) >= defaultTasks) countBack++;
+          else break;
+        }
+        currentStreak = countBack;
+      } else {
+        currentStreak = 0;
+      }        } else {
           if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
           tempStreak = 0;
         }
