@@ -140,20 +140,38 @@
     }
 
     function updateStreakFromCalendar() {
+  const current = new Date(today);
+  const year = current.getFullYear();
+  const month = current.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
   let currentStreak = 0;
   let longestStreakSoFar = 0;
   let tempStreak = 0;
 
-  for (let offset = 0; offset < 365; offset++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - offset);
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
     const key = date.toISOString().split("T")[0];
     const val = taskLog[key] || 0;
 
     if (val >= defaultTasks) {
       tempStreak++;
-      if (offset === 0) currentStreak = tempStreak;
+      if (date.toISOString().split("T")[0] === today) {
+        currentStreak = tempStreak;
+      }
     } else {
+      if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
+      tempStreak = 0;
+    }
+  }
+
+  if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
+
+  streak = currentStreak;
+  longestStreak = longestStreakSoFar;
+  localStorage.setItem("streak", streak);
+  localStorage.setItem("longestStreak", longestStreak);
+} else {
       if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
       tempStreak = 0;
     }
@@ -333,3 +351,4 @@
   </script>
 </body>
 </html>
+
