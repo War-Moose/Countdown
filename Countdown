@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Countdown Tracker</title>
+</head>
+<body>
+  <h2>Manual Countdown</h2>
+  <p>Counter: <span id="manualCount">3652</span></p>
+  <p>Days until 10 years from now: <span id="dateCount"></span></p>
+  <button onclick="decreaseCount()">Click Me</button>
+
+  <script>
+    let manualCount = 3652; // starting count
+    const targetDate = new Date();
+    targetDate.setFullYear(targetDate.getFullYear() + 10);
+
+    function updateDateCount() {
+      const now = new Date();
+      const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+      document.getElementById("dateCount").innerText = diff;
+    }
+
+    function decreaseCount() {
+      if (manualCount > 0) {
+        manualCount--;
+        document.getElementById("manualCount").innerText = manualCount;
+      }
+    }
+
+    updateDateCount();
+  </script>
+</body>
+</html>
