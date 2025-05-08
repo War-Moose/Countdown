@@ -142,20 +142,30 @@
     }
 
     function completeTask() {
-      if (tasksLeft > 0) {
-        tasksLeft--;
-        localStorage.setItem("tasksLeft", tasksLeft);
-      }
+  if (tasksLeft > 0) {
+    tasksLeft--;
+    localStorage.setItem("tasksLeft", tasksLeft);
+  }
 
-      tasksDone++;
-      totalTasksDone++;
+  tasksDone++;
+  totalTasksDone++;
 
-      localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("totalTasksDone", totalTasksDone);
+  localStorage.setItem("tasksDone", tasksDone);
+  localStorage.setItem("totalTasksDone", totalTasksDone);
 
-      updateDisplays();
-    }
+  // 👉 Check for streak update mid-day
+  if (tasksDone >= celebrationThreshold && lastSuccessfulDate !== today) {
+    streak++;
+    lastSuccessfulDate = today;
+    localStorage.setItem("streak", streak);
+    localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
+  }
 
+  updateDisplays();
+}
+
+    
+   
     function resetDay() {
       tasksLeft = defaultTasks;
       tasksDone = 0;
