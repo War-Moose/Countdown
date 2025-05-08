@@ -43,6 +43,32 @@
     .day.red { background-color: red; color: white; }
     .day.blue { background-color: blue; color: white; }
     .day.black { background-color: black; color: white; }
+    #menuOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+    #settingsMenu {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -20%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      z-index: 1000;
+    }
+    #settingsMenu button {
+      display: block;
+      margin: 10px auto;
+    }
   </style>
 </head>
 <body>
@@ -62,6 +88,15 @@
   <button onclick="document.getElementById('importInput').click()">Import Backup</button>
 
   <div class="calendar" id="calendar"></div>
+
+  <div id="menuOverlay" onclick="toggleMenu(false)"></div>
+  <div id="settingsMenu">
+    <h2>Settings Menu</h2>
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <button onclick="exportTrackerData()">Save Backup</button>
+    <button onclick="document.getElementById('importInput').click()">Import Backup</button>
+    <button onclick="toggleMenu(false)">Close</button>
+  </div>
 
   <script>
     const defaultTasks = 3;
@@ -141,6 +176,15 @@
       localStorage.setItem("darkMode", isDark ? "true" : "false");
     }
 
+    function toggleMenu(show = null) {
+      const menu = document.getElementById("settingsMenu");
+      const overlay = document.getElementById("menuOverlay");
+      const isVisible = menu.style.display === "block";
+      const shouldShow = show === null ? !isVisible : show;
+      menu.style.display = shouldShow ? "block" : "none";
+      overlay.style.display = shouldShow ? "block" : "none";
+    }
+
     function drawCalendar() {
       const cal = document.getElementById("calendar");
       cal.innerHTML = "";
@@ -207,6 +251,7 @@
 
     document.addEventListener("keydown", e => {
       if (e.key.toLowerCase() === "d") toggleDarkMode();
+      if (e.key.toLowerCase() === "m") toggleMenu();
     });
 
     if (localStorage.getItem("darkMode") === "true") {
