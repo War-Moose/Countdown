@@ -93,8 +93,7 @@
   <p class="counter">Daily Tasks Completed: <span id="tasksDone"></span></p>
   <p class="counter">Total Tasks Completed: <span id="totalTasksDone"></span></p>
   <p class="counter">Current Streak: <span id="streak"></span> days</p>
-  <p class="counter">Days until 10 years from today: <span id="dateCount"></span></p>
-  <button onclick="completeTask()">Complete Task</button>
+    <button onclick="completeTask()">Complete Task</button>
   <button onclick="resetDay()">Reset Day</button>
   <button onclick="advanceDay(-1)">-1 Day</button>
   <button onclick="advanceDay(1)">+1 Day</button>
@@ -163,7 +162,6 @@
       document.getElementById("currentDate").textContent = today;
 
       const diff = Math.ceil((targetDate - new Date(today)) / (1000 * 60 * 60 * 24));
-      document.getElementById("dateCount").textContent = diff;
       drawCalendar();
     }
 
