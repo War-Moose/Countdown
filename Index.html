@@ -56,7 +56,7 @@
   let tasksDone = parseInt(localStorage.getItem("tasksDone") || 0, 10);
 
   const targetDate = new Date();
-  targetDate.setFullYear(targetDate.getFullYear() + 45);
+  const targetDate = new Date("2035-05-08"); // Example: May 8, 2035
 
   function updateDisplays() {
     tasksLeftEl.textContent = tasksLeft;
