@@ -131,16 +131,20 @@
     const taskLog = JSON.parse(localStorage.getItem("taskLog") || "{}");
 
     if (savedDate !== today) {
-      if (parseInt(localStorage.getItem("tasksDone")) >= defaultTasks) {
-        streak++;
-        lastSuccessfulDate = savedDate;
-        localStorage.setItem("streak", streak);
-        localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
-      } else {
-        streak = 0;
-        localStorage.setItem("streak", streak);
-      }
-      resetDay();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+  if (parseInt(localStorage.getItem("tasksDone")) >= defaultTasks && savedDate === yesterdayStr) {
+    streak++;
+    lastSuccessfulDate = savedDate;
+    localStorage.setItem("streak", streak);
+    localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
+  } else {
+    streak = 0;
+    localStorage.setItem("streak", streak);
+  }
+  resetDay();
     }
 
     function updateDisplays() {
