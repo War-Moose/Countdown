@@ -31,6 +31,7 @@
       display: none;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <h1>Daily Task Tracker</h1>
@@ -107,6 +108,37 @@
     }
 
     updateDisplays();
+    let hasCelebrated = false; // Avoids spamming confetti
+
+function launchConfetti() {
+  confetti({
+    particleCount: 150,
+    spread: 80,
+    origin: { y: 0.6 }
+  });
+}
+
+function updateDisplays() {
+  tasksLeftEl.textContent = tasksLeft;
+  tasksDoneEl.textContent = tasksDone;
+
+  const now = new Date();
+  const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+  dateCountEl.textContent = diff >= 0 ? diff : 0;
+
+  if (tasksDone > celebrationThreshold) {
+    celebrationEl.style.display = "block";
+
+    if (!hasCelebrated) {
+      launchConfetti();
+      hasCelebrated = true;
+    }
+  } else {
+    celebrationEl.style.display = "none";
+    hasCelebrated = false; // Reset if they fall back under
+  }
+}
+
   </script>
 </body>
 </html>
