@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Countdown Until 80</title>
+  <title>Daily Task Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -14,57 +14,62 @@
       font-size: 2em;
     }
     .counter {
-      font-size: 3em;
-      margin: 20px 0;
+      font-size: 2em;
+      margin: 10px 0;
     }
     button {
       font-size: 1.2em;
       padding: 10px 20px;
       cursor: pointer;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Countdown to 80</h1>
+  <h1>Daily Task Tracker</h1>
   <div>
-    <p>Manual Counter: <span id="manualCount">...</span></p>
-    <p>Days until I turn 80: <span id="dateCount">...</span></p>
-    <button onclick="decreaseCount()">One More</button>
+    <p class="counter">Daily Tasks Left: <span id="tasksLeft">...</span></p>
+    <p class="counter">Daily Tasks Completed: <span id="tasksDone">...</span></p>
+    <p>Days until 10 years from today: <span id="dateCount">...</span></p>
+    <button onclick="completeTask()">Complete Task</button>
   </div>
 
   <script>
-    const manualCountEl = document.getElementById("manualCount");
+    const tasksLeftEl = document.getElementById("tasksLeft");
+    const tasksDoneEl = document.getElementById("tasksDone");
     const dateCountEl = document.getElementById("dateCount");
 
-    // Set target date 10 years from now
+    // Default daily task count
+    const defaultTasks = 5;
+
+    // Load or initialize values from localStorage
+    let tasksLeft = parseInt(localStorage.getItem("tasksLeft") || defaultTasks, 10);
+    let tasksDone = parseInt(localStorage.getItem("tasksDone") || 0, 10);
+
+    // Set target date
     const targetDate = new Date();
     targetDate.setFullYear(targetDate.getFullYear() + 10);
 
-    // Load saved manual count or default to 3652
-    let manualCount = parseInt(localStorage.getItem("manualCount") || "3652", 10);
+    function updateDisplays() {
+      tasksLeftEl.textContent = tasksLeft;
+      tasksDoneEl.textContent = tasksDone;
 
-    function updateDateCount() {
       const today = new Date();
-      const timeDiff = targetDate - today;
-      const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-      dateCountEl.textContent = days;
+      const diff = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+      dateCountEl.textContent = diff;
     }
 
-    function updateManualDisplay() {
-      manualCountEl.textContent = manualCount;
-    }
-
-    function decreaseCount() {
-      if (manualCount > 0) {
-        manualCount--;
-        updateManualDisplay();
-        localStorage.setItem("manualCount", manualCount);
+    function completeTask() {
+      if (tasksLeft > 0) {
+        tasksLeft--;
+        tasksDone++;
+        localStorage.setItem("tasksLeft", tasksLeft);
+        localStorage.setItem("tasksDone", tasksDone);
+        updateDisplays();
       }
     }
 
-    // On load
-    updateDateCount();
-    updateManualDisplay();
+    updateDisplays();
   </script>
 </body>
 </html>
