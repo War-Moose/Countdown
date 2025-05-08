@@ -161,6 +161,7 @@
     }
 
     function updateDisplays() {
+  updateStreakFromCalendar();
       document.getElementById("tasksLeft").textContent = tasksLeft;
       document.getElementById("tasksDone").textContent = tasksDone;
       document.getElementById("totalTasksDone").textContent = totalTasksDone;
@@ -226,10 +227,7 @@
     expectedPrev.setDate(expectedPrev.getDate() - 1);
     const expectedPrevStr = expectedPrev.toISOString().split("T")[0];
 
-    if (prevDone >= defaultTasks && prevDate === expectedPrevStr && lastSuccessfulDate !== today) {
-      streak++;
-      lastSuccessfulDate = today;
-      localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
+    // No longer increment streak here — will be handled by calendar-based logic instead
     } else {
       streak = 0;
     }
@@ -336,6 +334,51 @@
     }
 
     updateDisplays();
-  </script>
+  function updateStreakFromCalendar() {
+  const current = new Date(today);
+  const year = current.getFullYear();
+  const month = current.getMonth();
+  let currentStreak = 0;
+  let maxStreak = 0;
+  let streakActive = true;
+
+  for (let offset = 0; offset < 365; offset++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - offset);
+    const dateStr = d.toISOString().split("T")[0];
+    const val = taskLog[dateStr] || 0;
+
+    if (val >= defaultTasks) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+
+  for (let offset = 0; offset < 365; offset++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - offset);
+    const dateStr = d.toISOString().split("T")[0];
+    const val = taskLog[dateStr] || 0;
+
+    if (val >= defaultTasks) {
+      maxStreak++;
+    } else {
+      maxStreak = 0;
+    }
+
+    if (maxStreak > longestStreak) {
+      longestStreak = maxStreak;
+      localStorage.setItem("longestStreak", longestStreak);
+    }
+  }
+
+  streak = currentStreak;
+  localStorage.setItem("streak", streak);
+  document.getElementById("streak").textContent = streak;
+  document.getElementById("longestStreak").textContent = longestStreak;
+}
 </body>
 </html>
+
+  
