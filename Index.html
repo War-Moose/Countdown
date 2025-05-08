@@ -89,6 +89,7 @@
 <body>
   <h1>Daily Task Tracker</h1>
   <div>
+    <p class="counter">Date: <span id="currentDate">...</span></p>
     <p class="counter">Daily Tasks Left: <span id="tasksLeft">0</span></p>
     <p class="counter">Daily Tasks Completed: <span id="tasksDone">0</span></p>
     <p class="counter">Total Tasks Completed: <span id="totalTasksDone">0</span></p>
@@ -97,8 +98,8 @@
 
     <button onclick="completeTask()">Complete Task</button>
     <button onclick="resetDay()">Reset Day</button>
-    <button onclick="incrementDay(-1)">-1 Day</button>
-    <button onclick="incrementDay(1)">+1 Day</button>
+    <button onclick="advanceDay(-1)">-1 Day</button>
+    <button onclick="advanceDay(1)">+1 Day</button>
     <button onclick="exportTrackerData()">Save Backup</button>
     <input type="file" id="importInput" accept=".json" style="display: none" />
     <button onclick="document.getElementById('importInput').click()">Import Backup</button>
@@ -116,21 +117,21 @@
   <script>
     const defaultTasks = 5;
     const celebrationThreshold = 5;
-    let currentDate = new Date();
-    const today = () => currentDate.toISOString().split("T")[0];
+    let now = new Date();
+    let today = now.toISOString().split("T")[0];
 
     let tasksLeft = parseInt(localStorage.getItem("tasksLeft")) || defaultTasks;
     let tasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
     let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
     let streak = parseInt(localStorage.getItem("streak")) || 0;
     let lastSuccessfulDate = localStorage.getItem("lastSuccessfulDate") || "";
-    let savedDate = localStorage.getItem("taskDate");
+    const savedDate = localStorage.getItem("taskDate");
     let hasCelebrated = false;
 
     const targetDate = new Date();
     targetDate.setFullYear(targetDate.getFullYear() + 10);
 
-    if (savedDate !== today()) {
+    if (savedDate !== today) {
       handleStreakCarryover();
       resetDay();
     }
@@ -140,8 +141,8 @@
       document.getElementById('tasksDone').textContent = tasksDone;
       document.getElementById('totalTasksDone').textContent = totalTasksDone;
       document.getElementById('streak').textContent = streak;
-      const now = new Date();
-      const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+      document.getElementById('currentDate').textContent = today;
+      const diff = Math.ceil((targetDate - new Date(today)) / (1000 * 60 * 60 * 24));
       document.getElementById('dateCount').textContent = diff;
     }
 
@@ -157,9 +158,9 @@
       localStorage.setItem("tasksDone", tasksDone);
       localStorage.setItem("totalTasksDone", totalTasksDone);
 
-      if (tasksDone >= celebrationThreshold && lastSuccessfulDate !== today()) {
+      if (tasksDone >= celebrationThreshold && lastSuccessfulDate !== today) {
         streak++;
-        lastSuccessfulDate = today();
+        lastSuccessfulDate = today;
         localStorage.setItem("streak", streak);
         localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
 
@@ -191,7 +192,7 @@
       hasCelebrated = false;
       localStorage.setItem("tasksLeft", tasksLeft);
       localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("taskDate", today());
+      localStorage.setItem("taskDate", today);
       updateDisplays();
     }
 
@@ -245,17 +246,17 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `task-tracker-backup-${today()}.json`;
+      link.download = `task-tracker-backup-${today}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
 
-    function incrementDay(amount) {
-      currentDate.setDate(currentDate.getDate() + amount);
-      localStorage.setItem("taskDate", today());
-      handleStreakCarryover();
-      resetDay();
+    function advanceDay(offset) {
+      const newDate = new Date(today);
+      newDate.setDate(newDate.getDate() + offset);
+      today = newDate.toISOString().split("T")[0];
+      updateDisplays();
     }
 
     document.getElementById("importInput").addEventListener("change", function (event) {
@@ -280,9 +281,10 @@
     });
 
     document.addEventListener("keydown", (e) => {
-      if (!e.repeat) {
-        if (e.key.toLowerCase() === "m") toggleMenu();
-        if (e.key.toLowerCase() === "d") toggleDarkMode();
+      if (e.key.toLowerCase() === "m" && !e.repeat) {
+        toggleMenu();
+      } else if (e.key.toLowerCase() === "d" && !e.repeat) {
+        toggleDarkMode();
       }
     });
 
