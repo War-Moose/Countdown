@@ -38,6 +38,7 @@
   <div>
     <p class="counter">Daily Tasks Left: <span id="tasksLeft">...</span></p>
     <p class="counter">Daily Tasks Completed: <span id="tasksDone">...</span></p>
+    <p class="counter">Total Tasks Completed: <span id="totalTasksDone">...</span></p>
     <p>Days until 10 years from today: <span id="dateCount">...</span></p>
     <button onclick="completeTask()">Complete Task</button>
 
@@ -59,6 +60,11 @@
 
     const today = new Date().toISOString().split("T")[0];
     const savedDate = localStorage.getItem("taskDate");
+    const totalTasksDoneEl = document.getElementById("totalTasksDone");
+
+// Load total completed tasks or default to 0
+let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone"));
+if (isNaN(totalTasksDone)) totalTasksDone = 0;
 
     if (savedDate !== today) {
       resetDay();
@@ -126,7 +132,29 @@ function updateDisplays() {
     hasCelebrated = false; // Reset if they fall back under
   }
 }
+function completeTask() {
+  if (tasksLeft > 0) {
+    tasksLeft--;
+    localStorage.setItem("tasksLeft", tasksLeft);
+  }
 
+  tasksDone++;
+  totalTasksDone++;
+
+  localStorage.setItem("tasksDone", tasksDone);
+  localStorage.setItem("totalTasksDone", totalTasksDone);
+
+  updateDisplays();
+}
+
+// Update display function now includes this:
+function updateDisplays() {
+  tasksLeftEl.textContent = tasksLeft;
+  tasksDoneEl.textContent = tasksDone;
+  totalTasksDoneEl.textContent = totalTasksDone;
+
+  // ... rest remains the same ...
+}
     // 👇 Easily removable reset function and button
     function resetDay() {
       tasksLeft = defaultTasks;
