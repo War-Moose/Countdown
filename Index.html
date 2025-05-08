@@ -41,25 +41,24 @@
 
   const defaultTasks = 5;
 
-  // Get today's date as string
+  // Get today’s date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
   const savedDate = localStorage.getItem("taskDate");
 
-  // If it's a new day or never set, reset the counters
+  // If it's a new day or no date is saved, reset
   if (savedDate !== today) {
     localStorage.setItem("tasksLeft", defaultTasks);
     localStorage.setItem("tasksDone", 0);
     localStorage.setItem("taskDate", today);
   }
 
-  // Safely parse or fall back to defaults
+  // Safely load values or fallback
   let tasksLeft = parseInt(localStorage.getItem("tasksLeft"));
   if (isNaN(tasksLeft)) tasksLeft = defaultTasks;
 
   let tasksDone = parseInt(localStorage.getItem("tasksDone"));
   if (isNaN(tasksDone)) tasksDone = 0;
 
-  // --- Set your custom target date here ---
   const targetDate = new Date("2035-05-08");
 
   function updateDisplays() {
@@ -74,14 +73,15 @@
   function completeTask() {
     if (tasksLeft > 0) {
       tasksLeft--;
-      tasksDone++;
       localStorage.setItem("tasksLeft", tasksLeft);
-      localStorage.setItem("tasksDone", tasksDone);
-      updateDisplays();
     }
+    tasksDone++;
+    localStorage.setItem("tasksDone", tasksDone);
+    updateDisplays();
   }
 
   updateDisplays();
 </script>
+
 </body>
 </html>
