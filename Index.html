@@ -110,8 +110,7 @@
     <button onclick="resetDay()">Reset Day</button>
     <button onclick="advanceDay(-1)">-1 Day</button>
     <button onclick="advanceDay(1)">+1 Day</button>
-    <button onclick="exportTrackerData()">Save Backup</button>
-    <button onclick="document.getElementById('importInput').click()">Import Backup</button>
+    
     <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
     <button onclick="exportTrackerData()">Save Backup</button>
     <button onclick="document.getElementById('importInput').click()">Import Backup</button>
@@ -141,20 +140,45 @@
     }
 
     function updateStreakFromCalendar() {
-      let currentStreak = 0;
-      let bestStreak = 0;
-      let tempStreak = 0;
+  let currentStreak = 0;
+  let longestStreakSoFar = 0;
+  let tempStreak = 0;
 
-      for (let offset = 0; offset < 365; offset++) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - offset);
-        const key = d.toISOString().split("T")[0];
-        const val = taskLog[key] || 0;
+  for (let offset = 0; offset < 365; offset++) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - offset);
+    const key = date.toISOString().split("T")[0];
+    const val = taskLog[key] || 0;
 
-        if (val >= defaultTasks) {
-          tempStreak++;
-          if (offset === 0) currentStreak = tempStreak;
-        } else {
+    if (val >= defaultTasks) {
+      tempStreak++;
+      if (offset === 0) currentStreak = tempStreak;
+    } else {
+      if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
+      tempStreak = 0;
+    }
+  }
+
+  if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
+
+  streak = currentStreak;
+  longestStreak = longestStreakSoFar;
+  localStorage.setItem("streak", streak);
+  localStorage.setItem("longestStreak", longestStreak);
+}
+    } else {
+      if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
+      tempStreak = 0;
+    }
+  }
+
+  if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
+
+  streak = currentStreak;
+  longestStreak = longestStreakSoFar;
+  localStorage.setItem("streak", streak);
+  localStorage.setItem("longestStreak", longestStreak);
+} else {
           if (tempStreak > bestStreak) bestStreak = tempStreak;
           tempStreak = 0;
         }
