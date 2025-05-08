@@ -150,17 +150,25 @@
 }
 
 
-    function resetDay() {
-      tasksLeft = defaultTasks;
-      tasksDone = 0;
-      hasCelebrated = false;
+   function resetDay() {
+  tasksLeft = defaultTasks;
+  tasksDone = 0;
+  //totalTasksDone = 0; // Optional: comment this out if you want to keep total count
+  streak = 0;
+  lastSuccessfulDate = "";
 
-      localStorage.setItem("tasksLeft", tasksLeft);
-      localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("taskDate", today);
+  hasCelebrated = false;
 
-      updateDisplays();
-    }
+  localStorage.setItem("tasksLeft", tasksLeft);
+  localStorage.setItem("tasksDone", tasksDone);
+  localStorage.setItem("totalTasksDone", totalTasksDone);
+  localStorage.setItem("streak", streak);
+  localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
+  localStorage.setItem("taskDate", today);
+
+  updateDisplays();
+}
+
 
     function handleStreakCarryover() {
       const prevTasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
