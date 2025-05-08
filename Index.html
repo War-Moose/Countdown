@@ -1,14 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Daily Task Tracker</title>
+  <meta charset="UTF-8">
+  <title>War Moose Daily Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
-      padding: 50px;
-      background: #f0f0f0;
+      padding: 30px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: background 0.3s, color 0.3s;
+    }
+    :root {
+      --bg-color: #f0f0f0;
+      --text-color: #000;
+    }
+    body.dark {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
     }
     h1 {
       font-size: 2em;
@@ -28,18 +39,24 @@
       font-weight: bold;
       margin-top: 20px;
     }
-    #celebration {
-      color: green;
+    #celebration { color: green; }
+    #bonusMessage { color: orange; }
+    #badges {
+      margin-top: 20px;
+      font-size: 1.4em;
     }
-    #bonusMessage {
-      color: orange;
+    #darkModeToggle {
+      position: fixed;
+      top: 15px;
+      right: 15px;
     }
   </style>
-  <!-- 🎉 Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <h1>Daily Task Tracker</h1>
+  <button id="darkModeToggle" onclick="toggleDarkMode()">🌓</button>
+
+  <h1>🦌 War Moose Task Tracker</h1>
   <div>
     <p class="counter">Daily Tasks Left: <span id="tasksLeft">...</span></p>
     <p class="counter">Daily Tasks Completed: <span id="tasksDone">...</span></p>
@@ -47,11 +64,12 @@
     <p class="counter">Current Streak: <span id="streak">0</span> days</p>
     <p>Days until 10 years from today: <span id="dateCount">...</span></p>
 
-    <button onclick="completeTask()">Complete Task</button>
-    <button onclick="resetDay()">Reset Day</button>
+    <button onclick="completeTask()">✅ Complete Task</button>
+    <button onclick="resetDay()">🔁 Reset Day</button>
 
     <div id="celebration">🎉 YOU BEAT THE GOAL! 🎉</div>
     <div id="bonusMessage"></div>
+    <div id="badges"><strong>🏅 Badges:</strong> <span id="badgeList">None yet</span></div>
   </div>
 
   <script>
@@ -65,12 +83,13 @@
     const dateCountEl = document.getElementById("dateCount");
     const celebrationEl = document.getElementById("celebration");
     const bonusMessageEl = document.getElementById("bonusMessage");
+    const badgeListEl = document.getElementById("badgeList");
 
     const today = new Date().toISOString().split("T")[0];
     const savedDate = localStorage.getItem("taskDate");
 
     if (savedDate !== today) {
-      handleStreakCarryover(); // Evaluate streak based on yesterday's performance
+      handleStreakCarryover();
       resetDay();
     }
 
@@ -79,16 +98,15 @@
     let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
     let streak = parseInt(localStorage.getItem("streak")) || 0;
     let lastSuccessfulDate = localStorage.getItem("lastSuccessfulDate");
+    let badges = JSON.parse(localStorage.getItem("badges") || "[]");
 
     const targetDate = new Date("2035-05-08");
     let hasCelebrated = false;
 
     function launchConfetti(level = "standard") {
       let config = { particleCount: 150, spread: 60, origin: { y: 0.6 } };
-
       if (level === "epic") config = { particleCount: 300, spread: 120 };
       if (level === "storm") config = { particleCount: 500, spread: 160 };
-
       confetti(config);
     }
 
@@ -104,9 +122,8 @@
 
       if (tasksDone >= celebrationThreshold) {
         celebrationEl.style.display = "block";
-
         if (!hasCelebrated) {
-          launchConfetti(); // Regular confetti for reaching daily goal
+          launchConfetti();
           hasCelebrated = true;
         }
       } else {
@@ -114,7 +131,7 @@
         hasCelebrated = false;
       }
 
-      // Bonus messages by streak length
+      // Bonus Messages
       if (streak >= 30) {
         bonusMessageEl.textContent = "👑 Moose Legend Unlocked!";
         launchConfetti("storm");
@@ -127,6 +144,8 @@
       } else {
         bonusMessageEl.textContent = "";
       }
+
+      updateBadges();
     }
 
     function completeTask() {
@@ -141,6 +160,7 @@
       localStorage.setItem("tasksDone", tasksDone);
       localStorage.setItem("totalTasksDone", totalTasksDone);
 
+      checkBadgeConditions();
       updateDisplays();
     }
 
@@ -157,7 +177,6 @@
     }
 
     function handleStreakCarryover() {
-      // Only counts as a "streak day" if yesterday's tasks met the goal
       const prevTasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
       const prevDate = localStorage.getItem("taskDate");
 
@@ -172,6 +191,42 @@
       localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate || "");
     }
 
+    function checkBadgeConditions() {
+      const addBadge = (name, emoji) => {
+        if (!badges.some(b => b.name === name)) {
+          badges.push({ name, emoji });
+          localStorage.setItem("badges", JSON.stringify(badges));
+        }
+      };
+
+      if (totalTasksDone >= 1) addBadge("First Steps", "🟢");
+      if (tasksDone >= celebrationThreshold) addBadge("Daily Dominator", "🔥");
+      if (streak >= 3) addBadge("3-Day Streak", "💪");
+      if (streak >= 7) addBadge("7-Day Streak", "🦌");
+      if (streak >= 30) addBadge("Moose Legend", "👑");
+    }
+
+    function updateBadges() {
+      if (badges.length === 0) {
+        badgeListEl.textContent = "None yet";
+      } else {
+        badgeListEl.textContent = badges.map(b => `${b.emoji} ${b.name}`).join(" | ");
+      }
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "true" : "false");
+    }
+
+    function loadDarkModePreference() {
+      if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark");
+      }
+    }
+
+    // Init
+    loadDarkModePreference();
     updateDisplays();
   </script>
 </body>
