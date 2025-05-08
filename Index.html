@@ -46,17 +46,6 @@
     .day.red { background-color: red; color: white; }
     .day.blue { background-color: blue; color: white; }
     .day.black { background-color: black; color: white; }
-    .streak-boost {
-      animation: streakPop 1s ease-in-out;
-      color: gold;
-      text-shadow: 0 0 8px orange, 0 0 12px gold;
-    }
-    @keyframes streakPop {
-      0% { transform: scale(1); opacity: 1; }
-      25% { transform: scale(1.3); opacity: 1; }
-      50% { transform: scale(0.9); }
-      100% { transform: scale(1); }
-    }
     #menuOverlay {
       display: none;
       position: fixed;
@@ -126,7 +115,6 @@
     let longestStreak = parseInt(localStorage.getItem("longestStreak")) || 0;
     const taskLog = JSON.parse(localStorage.getItem("taskLog") || "{}");
     let savedDate = localStorage.getItem("taskDate");
-    let hasCelebrated = false;
 
     if (savedDate !== today) {
       tasksDone = 0;
@@ -152,24 +140,9 @@
         const val = taskLog[key] || 0;
 
         if (val >= defaultTasks) {
-        tempStreak++;
-        if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-      } else {
-        tempStreak = 0;
-      }
-
-      const todayVal = taskLog[today] || 0;
-      if (todayVal >= defaultTasks) {
-        let countBack = 0;
-        for (let d = new Date(today); d.getMonth() === month && d.getDate() > 0; d.setDate(d.getDate() - 1)) {
-          const k = d.toISOString().split("T")[0];
-          if ((taskLog[k] || 0) >= defaultTasks) countBack++;
-          else break;
-        }
-        currentStreak = countBack;
-      } else {
-        currentStreak = 0;
-      }        } else {
+          tempStreak++;
+          if (key === today) currentStreak = tempStreak;
+        } else {
           if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
           tempStreak = 0;
         }
@@ -199,19 +172,16 @@
       tasksDone++;
       totalTasksDone++;
       taskLog[today] = tasksDone;
-
       localStorage.setItem("tasksLeft", tasksLeft);
       localStorage.setItem("tasksDone", tasksDone);
       localStorage.setItem("totalTasksDone", totalTasksDone);
       localStorage.setItem("taskLog", JSON.stringify(taskLog));
-
       updateDisplays();
     }
 
     function resetDay() {
       tasksLeft = defaultTasks;
       tasksDone = 0;
-      hasCelebrated = false;
       delete taskLog[today];
       localStorage.setItem("tasksLeft", tasksLeft);
       localStorage.setItem("tasksDone", tasksDone);
