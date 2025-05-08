@@ -120,32 +120,35 @@
 
     const targetDate = new Date("2035-05-08");
 
-    function completeTask() {
-      if (tasksLeft > 0) {
-        tasksLeft--;
-        localStorage.setItem("tasksLeft", tasksLeft);
-      }
+   function completeTask() {
+  if (tasksLeft > 0) {
+    tasksLeft--;
+    localStorage.setItem("tasksLeft", tasksLeft);
+  }
 
-      tasksDone++;
-      totalTasksDone++;
+  tasksDone++;
+  totalTasksDone++;
 
-      localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("totalTasksDone", totalTasksDone);
+  localStorage.setItem("tasksDone", tasksDone);
+  localStorage.setItem("totalTasksDone", totalTasksDone);
 
-      // 🧠 Live streak update when reaching goal
-      if (tasksDone >= celebrationThreshold && lastSuccessfulDate !== today) {
-        streak++;
-        lastSuccessfulDate = today;
-        localStorage.setItem("streak", streak);
-        localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
+  // 🎯 Streak update only once per day
+  if (tasksDone >= celebrationThreshold && lastSuccessfulDate !== today) {
+    streak++;
+    lastSuccessfulDate = today;
+    localStorage.setItem("streak", streak);
+    localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
 
-        // Add animation class
-        streakEl.classList.add("streak-boost");
-        setTimeout(() => streakEl.classList.remove("streak-boost"), 1200);
-      }
+    // 🚀 Offset streak glow until after confetti
+    setTimeout(() => {
+      streakEl.classList.add("streak-boost");
+      setTimeout(() => streakEl.classList.remove("streak-boost"), 1200);
+    }, 1000); // ⏱️ Delay start of animation
+  }
 
-      updateDisplays();
-    }
+  updateDisplays();
+}
+
 
     function resetDay() {
       tasksLeft = defaultTasks;
