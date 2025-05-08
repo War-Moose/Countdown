@@ -184,14 +184,16 @@
     }
 
     function resetDay() {
-      tasksLeft = defaultTasks;
-      tasksDone = 0;
-      hasCelebrated = false;
-      localStorage.setItem("tasksLeft", tasksLeft);
-      localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("taskDate", today);
-      localStorage.setItem("streak", streak);
-      updateDisplays();
+  tasksLeft = defaultTasks;
+  tasksDone = 0;
+  hasCelebrated = false;
+  localStorage.setItem("tasksLeft", tasksLeft);
+  localStorage.setItem("tasksDone", tasksDone);
+  localStorage.setItem("taskDate", today);
+  localStorage.setItem("streak", streak);
+  delete taskLog[today];
+  localStorage.setItem("taskLog", JSON.stringify(taskLog));
+  updateDisplays();
     }
 
     function advanceDay(offset) {
