@@ -94,7 +94,7 @@
   <p class="counter">Total Tasks Completed: <span id="totalTasksDone"></span></p>
   <p class="counter">Current Streak: <span id="streak"></span> days</p>
   <p class="counter">Longest Streak: <span id="longestStreak"></span> days</p>
-    <button onclick="completeTask()">Complete Task</button>
+  <button onclick="completeTask()">Complete Task</button>
   <button onclick="resetDay()">Reset Day</button>
   <button onclick="advanceDay(-1)">-1 Day</button>
   <button onclick="advanceDay(1)">+1 Day</button>
@@ -117,59 +117,60 @@
     const defaultTasks = 3;
     let now = new Date();
     let today = now.toISOString().split("T")[0];
-    let targetDate = new Date();
-    targetDate.setFullYear(targetDate.getFullYear() + 10);
 
     let tasksLeft = parseInt(localStorage.getItem("tasksLeft")) || defaultTasks;
     let tasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
     let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
     let streak = parseInt(localStorage.getItem("streak")) || 0;
     let longestStreak = parseInt(localStorage.getItem("longestStreak")) || 0;
-    let lastSuccessfulDate = localStorage.getItem("lastSuccessfulDate") || "";
+    const taskLog = JSON.parse(localStorage.getItem("taskLog") || "{}");
     let savedDate = localStorage.getItem("taskDate");
     let hasCelebrated = false;
 
-    const taskLog = JSON.parse(localStorage.getItem("taskLog") || "{}");
-
     if (savedDate !== today) {
-  tasksDone = 0;
-  tasksLeft = defaultTasks;
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("tasksLeft", tasksLeft);
-  tasksDone = 0;
-  localStorage.setItem("tasksDone", tasksDone);
-  tasksDone = 0;
-  localStorage.setItem("tasksDone", tasksDone);
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-  if (parseInt(localStorage.getItem("tasksDone")) >= defaultTasks && savedDate === yesterdayStr) {
-    streak++;
-    lastSuccessfulDate = savedDate;
-    localStorage.setItem("streak", streak);
-    localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
-  } else {
-    streak = 0;
-    if (streak > longestStreak) {
-      longestStreak = streak;
-      localStorage.setItem("longestStreak", longestStreak);
+      tasksDone = 0;
+      tasksLeft = defaultTasks;
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("taskDate", today);
     }
-    localStorage.setItem("streak", streak);
-  }
-  resetDay();
+
+    function updateStreakFromCalendar() {
+      let currentStreak = 0;
+      let bestStreak = 0;
+      let tempStreak = 0;
+
+      for (let offset = 0; offset < 365; offset++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - offset);
+        const key = d.toISOString().split("T")[0];
+        const val = taskLog[key] || 0;
+
+        if (val >= defaultTasks) {
+          tempStreak++;
+          if (offset === 0) currentStreak = tempStreak;
+        } else {
+          if (tempStreak > bestStreak) bestStreak = tempStreak;
+          tempStreak = 0;
+        }
+      }
+
+      if (tempStreak > bestStreak) bestStreak = tempStreak;
+
+      streak = currentStreak;
+      longestStreak = bestStreak;
+      localStorage.setItem("streak", streak);
+      localStorage.setItem("longestStreak", longestStreak);
     }
 
     function updateDisplays() {
-  updateStreakFromCalendar();
+      updateStreakFromCalendar();
       document.getElementById("tasksLeft").textContent = tasksLeft;
       document.getElementById("tasksDone").textContent = tasksDone;
       document.getElementById("totalTasksDone").textContent = totalTasksDone;
       document.getElementById("streak").textContent = streak;
       document.getElementById("longestStreak").textContent = longestStreak;
       document.getElementById("currentDate").textContent = today;
-
-      const diff = Math.ceil((targetDate - new Date(today)) / (1000 * 60 * 60 * 24));
       drawCalendar();
     }
 
@@ -177,73 +178,39 @@
       if (tasksLeft > 0) tasksLeft--;
       tasksDone++;
       totalTasksDone++;
-
       taskLog[today] = tasksDone;
 
       localStorage.setItem("tasksLeft", tasksLeft);
       localStorage.setItem("tasksDone", tasksDone);
       localStorage.setItem("totalTasksDone", totalTasksDone);
-      localStorage.setItem("taskDate", today);
-      localStorage.setItem("streak", streak);
       localStorage.setItem("taskLog", JSON.stringify(taskLog));
-
-      if (tasksDone >= defaultTasks && lastSuccessfulDate !== today) {
-        streak++;
-        lastSuccessfulDate = today;
-        localStorage.setItem("streak", streak);
-        localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
-
-        const streakEl = document.getElementById("streak");
-        streakEl.classList.add("streak-boost");
-        setTimeout(() => streakEl.classList.remove("streak-boost"), 1200);
-      }
 
       updateDisplays();
     }
 
     function resetDay() {
-  tasksLeft = defaultTasks;
-  tasksDone = 0;
-  hasCelebrated = false;
-  localStorage.setItem("tasksLeft", tasksLeft);
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("taskDate", today);
-  localStorage.setItem("streak", streak);
-  delete taskLog[today];
-  localStorage.setItem("taskLog", JSON.stringify(taskLog));
-  updateDisplays();
+      tasksLeft = defaultTasks;
+      tasksDone = 0;
+      hasCelebrated = false;
+      delete taskLog[today];
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("taskLog", JSON.stringify(taskLog));
+      updateDisplays();
     }
 
     function advanceDay(offset) {
-  const newDate = new Date(today);
-  newDate.setDate(newDate.getDate() + offset);
-  today = newDate.toISOString().split("T")[0];
-
-  if (today !== localStorage.getItem("taskDate")) {
-    const prevDate = localStorage.getItem("taskDate");
-    const prevDone = parseInt(localStorage.getItem("tasksDone")) || 0;
-    const prevDateObj = prevDate ? new Date(prevDate) : null;
-    const expectedPrev = new Date(today);
-    expectedPrev.setDate(expectedPrev.getDate() - 1);
-    const expectedPrevStr = expectedPrev.toISOString().split("T")[0];
-
-    // No longer increment streak here — will be handled by calendar-based logic instead
-    } else {
-      streak = 0;
-    }
-    if (streak > longestStreak) {
-      longestStreak = streak;
-      localStorage.setItem("longestStreak", longestStreak);
-    }
-    localStorage.setItem("streak", streak);
-    localStorage.setItem("taskDate", today);
-    tasksDone = 0;
-    tasksLeft = defaultTasks;
-    localStorage.setItem("tasksDone", tasksDone);
-    localStorage.setItem("tasksLeft", tasksLeft);
-  }
-
-  updateDisplays();
+      const newDate = new Date(today);
+      newDate.setDate(newDate.getDate() + offset);
+      today = newDate.toISOString().split("T")[0];
+      if (today !== localStorage.getItem("taskDate")) {
+        tasksDone = 0;
+        tasksLeft = defaultTasks;
+        localStorage.setItem("tasksDone", tasksDone);
+        localStorage.setItem("tasksLeft", tasksLeft);
+        localStorage.setItem("taskDate", today);
+      }
+      updateDisplays();
     }
 
     function toggleDarkMode() {
@@ -263,7 +230,6 @@
     function drawCalendar() {
       const cal = document.getElementById("calendar");
       cal.innerHTML = "";
-
       const current = new Date(today);
       const year = current.getFullYear();
       const month = current.getMonth();
@@ -292,7 +258,7 @@
         tasksDone,
         totalTasksDone,
         streak,
-        lastSuccessfulDate,
+        longestStreak,
         taskLog,
         dateExported: new Date().toISOString()
       };
@@ -315,6 +281,7 @@
           if (data.tasksDone !== undefined) tasksDone = data.tasksDone;
           if (data.totalTasksDone !== undefined) totalTasksDone = data.totalTasksDone;
           if (data.streak !== undefined) streak = data.streak;
+          if (data.longestStreak !== undefined) longestStreak = data.longestStreak;
           if (data.taskLog) localStorage.setItem("taskLog", JSON.stringify(data.taskLog));
           updateDisplays();
         } catch (err) {
@@ -334,51 +301,6 @@
     }
 
     updateDisplays();
-  function updateStreakFromCalendar() {
-  const current = new Date(today);
-  const year = current.getFullYear();
-  const month = current.getMonth();
-  let currentStreak = 0;
-  let maxStreak = 0;
-  let streakActive = true;
-
-  for (let offset = 0; offset < 365; offset++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - offset);
-    const dateStr = d.toISOString().split("T")[0];
-    const val = taskLog[dateStr] || 0;
-
-    if (val >= defaultTasks) {
-      currentStreak++;
-    } else {
-      break;
-    }
-  }
-
-  for (let offset = 0; offset < 365; offset++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - offset);
-    const dateStr = d.toISOString().split("T")[0];
-    const val = taskLog[dateStr] || 0;
-
-    if (val >= defaultTasks) {
-      maxStreak++;
-    } else {
-      maxStreak = 0;
-    }
-
-    if (maxStreak > longestStreak) {
-      longestStreak = maxStreak;
-      localStorage.setItem("longestStreak", longestStreak);
-    }
-  }
-
-  streak = currentStreak;
-  localStorage.setItem("streak", streak);
-  document.getElementById("streak").textContent = streak;
-  document.getElementById("longestStreak").textContent = longestStreak;
-}
+  </script>
 </body>
 </html>
-
-  
