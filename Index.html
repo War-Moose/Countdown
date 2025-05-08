@@ -25,20 +25,24 @@
     }
     .calendar {
       display: grid;
-      grid-template-columns: repeat(7, 30px);
+      grid-template-columns: repeat(7, 40px);
       gap: 4px;
       justify-content: center;
       margin-top: 20px;
     }
     .day {
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 40px;
       border: 1px solid #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8em;
     }
-    .day.white { background-color: white; }
-    .day.red { background-color: red; }
-    .day.blue { background-color: blue; }
-    .day.black { background-color: black; }
+    .day.white { background-color: white; color: black; }
+    .day.red { background-color: red; color: white; }
+    .day.blue { background-color: blue; color: white; }
+    .day.black { background-color: black; color: white; }
   </style>
 </head>
 <body>
@@ -140,18 +144,25 @@
     function drawCalendar() {
       const cal = document.getElementById("calendar");
       cal.innerHTML = "";
-      const todayDate = new Date(today);
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date(todayDate);
-        d.setDate(d.getDate() - i);
-        const key = d.toISOString().split("T")[0];
+
+      const current = new Date(today);
+      const year = current.getFullYear();
+      const month = current.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const key = date.toISOString().split("T")[0];
         const val = taskLog[key] || 0;
         const box = document.createElement("div");
         box.classList.add("day");
+        box.textContent = day;
+
         if (val === 0) box.classList.add("white");
         else if (val === 1) box.classList.add("red");
         else if (val === 2) box.classList.add("blue");
         else box.classList.add("black");
+
         cal.appendChild(box);
       }
     }
