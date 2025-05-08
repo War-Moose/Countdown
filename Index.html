@@ -21,7 +21,14 @@
       font-size: 1.2em;
       padding: 10px 20px;
       cursor: pointer;
+      margin: 10px;
+    }
+    #celebration {
+      font-size: 1.5em;
+      color: green;
+      font-weight: bold;
       margin-top: 20px;
+      display: none;
     }
   </style>
 </head>
@@ -32,56 +39,74 @@
     <p class="counter">Daily Tasks Completed: <span id="tasksDone">...</span></p>
     <p>Days until 10 years from today: <span id="dateCount">...</span></p>
     <button onclick="completeTask()">Complete Task</button>
+
+    <!-- 👇 Optional Reset Button (can be removed easily) -->
+    <button onclick="resetDay()">Reset Day</button>
+
+    <!-- 🎉 Celebration Message -->
+    <div id="celebration">🎉 YOU BEAT THE GOAL! 🎉</div>
   </div>
 
-<script>
-  const tasksLeftEl = document.getElementById("tasksLeft");
-  const tasksDoneEl = document.getElementById("tasksDone");
-  const dateCountEl = document.getElementById("dateCount");
+  <script>
+    const defaultTasks = 5;
+    const celebrationThreshold = 5; // Change this to your desired goal number
 
-  const defaultTasks = 5;
+    const tasksLeftEl = document.getElementById("tasksLeft");
+    const tasksDoneEl = document.getElementById("tasksDone");
+    const dateCountEl = document.getElementById("dateCount");
+    const celebrationEl = document.getElementById("celebration");
 
-  // Get today’s date in YYYY-MM-DD format
-  const today = new Date().toISOString().split("T")[0];
-  const savedDate = localStorage.getItem("taskDate");
+    const today = new Date().toISOString().split("T")[0];
+    const savedDate = localStorage.getItem("taskDate");
 
-  // If it's a new day or no date is saved, reset
-  if (savedDate !== today) {
-    localStorage.setItem("tasksLeft", defaultTasks);
-    localStorage.setItem("tasksDone", 0);
-    localStorage.setItem("taskDate", today);
-  }
-
-  // Safely load values or fallback
-  let tasksLeft = parseInt(localStorage.getItem("tasksLeft"));
-  if (isNaN(tasksLeft)) tasksLeft = defaultTasks;
-
-  let tasksDone = parseInt(localStorage.getItem("tasksDone"));
-  if (isNaN(tasksDone)) tasksDone = 0;
-
-  const targetDate = new Date("2035-05-08");
-
-  function updateDisplays() {
-    tasksLeftEl.textContent = tasksLeft;
-    tasksDoneEl.textContent = tasksDone;
-
-    const now = new Date();
-    const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
-    dateCountEl.textContent = diff >= 0 ? diff : 0;
-  }
-
-  function completeTask() {
-    if (tasksLeft > 0) {
-      tasksLeft--;
-      localStorage.setItem("tasksLeft", tasksLeft);
+    if (savedDate !== today) {
+      resetDay();
     }
-    tasksDone++;
-    localStorage.setItem("tasksDone", tasksDone);
+
+    let tasksLeft = parseInt(localStorage.getItem("tasksLeft"));
+    if (isNaN(tasksLeft)) tasksLeft = defaultTasks;
+
+    let tasksDone = parseInt(localStorage.getItem("tasksDone"));
+    if (isNaN(tasksDone)) tasksDone = 0;
+
+    const targetDate = new Date("2035-05-08");
+
+    function updateDisplays() {
+      tasksLeftEl.textContent = tasksLeft;
+      tasksDoneEl.textContent = tasksDone;
+
+      const now = new Date();
+      const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+      dateCountEl.textContent = diff >= 0 ? diff : 0;
+
+      if (tasksDone > celebrationThreshold) {
+        celebrationEl.style.display = "block";
+      } else {
+        celebrationEl.style.display = "none";
+      }
+    }
+
+    function completeTask() {
+      if (tasksLeft > 0) {
+        tasksLeft--;
+        localStorage.setItem("tasksLeft", tasksLeft);
+      }
+      tasksDone++;
+      localStorage.setItem("tasksDone", tasksDone);
+      updateDisplays();
+    }
+
+    // 👇 Easily removable reset function and button
+    function resetDay() {
+      tasksLeft = defaultTasks;
+      tasksDone = 0;
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("taskDate", new Date().toISOString().split("T")[0]);
+      updateDisplays();
+    }
+
     updateDisplays();
-  }
-
-  updateDisplays();
-</script>
-
+  </script>
 </body>
 </html>
