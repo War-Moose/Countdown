@@ -51,13 +51,29 @@
     #celebration { color: green; }
     #bonusMessage { color: orange; }
 
-    label[for="darkModeToggleSwitch"] {
+    /* Dark mode toggle styling */
+    #darkToggleLabel {
       position: absolute;
       top: 20px;
       right: 20px;
       font-size: 1em;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
     }
 
+    #darkToggleLabel:hover,
+    #darkToggleLabel:focus-within {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    body.show-dark-toggle #darkToggleLabel {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* Streak pop animation */
     .streak-boost {
       animation: streakPop 1s ease-in-out;
       color: gold;
@@ -74,7 +90,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <label for="darkModeToggleSwitch">
+  <label for="darkModeToggleSwitch" id="darkToggleLabel">
     <input type="checkbox" id="darkModeToggleSwitch" onchange="toggleDarkMode()" />
     Dark Mode
   </label>
@@ -303,6 +319,21 @@
 
       reader.readAsText(file);
     });
+
+    // 🔑 Toggle dark mode via D key
+    document.addEventListener("keydown", (e) => {
+      if (e.key.toLowerCase() === "d" && !e.repeat) {
+        toggleDarkMode();
+        flashDarkToggle();
+      }
+    });
+
+    function flashDarkToggle() {
+      document.body.classList.add("show-dark-toggle");
+      setTimeout(() => {
+        document.body.classList.remove("show-dark-toggle");
+      }, 2000);
+    }
 
     loadDarkModePreference();
     updateDisplays();
