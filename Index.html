@@ -39,24 +39,28 @@
   const tasksDoneEl = document.getElementById("tasksDone");
   const dateCountEl = document.getElementById("dateCount");
 
-  const defaultTasks = 10;
+  const defaultTasks = 5;
 
-  // Get today's date in YYYY-MM-DD format
+  // Get today's date as string
   const today = new Date().toISOString().split("T")[0];
   const savedDate = localStorage.getItem("taskDate");
 
-  // If it's a new day, reset
+  // If it's a new day or never set, reset the counters
   if (savedDate !== today) {
     localStorage.setItem("tasksLeft", defaultTasks);
     localStorage.setItem("tasksDone", 0);
     localStorage.setItem("taskDate", today);
   }
 
-  let tasksLeft = parseInt(localStorage.getItem("tasksLeft") || defaultTasks, 10);
-  let tasksDone = parseInt(localStorage.getItem("tasksDone") || 0, 10);
+  // Safely parse or fall back to defaults
+  let tasksLeft = parseInt(localStorage.getItem("tasksLeft"));
+  if (isNaN(tasksLeft)) tasksLeft = defaultTasks;
 
-  const targetDate = new Date();
-  const targetDate = new Date("2035-05-08"); // Example: May 8, 2035
+  let tasksDone = parseInt(localStorage.getItem("tasksDone"));
+  if (isNaN(tasksDone)) tasksDone = 0;
+
+  // --- Set your custom target date here ---
+  const targetDate = new Date("2035-05-08");
 
   function updateDisplays() {
     tasksLeftEl.textContent = tasksLeft;
@@ -64,7 +68,7 @@
 
     const now = new Date();
     const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
-    dateCountEl.textContent = diff;
+    dateCountEl.textContent = diff >= 0 ? diff : 0;
   }
 
   function completeTask() {
