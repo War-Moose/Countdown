@@ -56,6 +56,20 @@
       top: 15px;
       right: 15px;
     }
+
+    /* Highlight streak increase */
+    .streak-boost {
+      animation: streakPop 1s ease-in-out;
+      color: gold;
+      text-shadow: 0 0 8px orange, 0 0 12px gold;
+    }
+
+    @keyframes streakPop {
+      0% { transform: scale(1); opacity: 1; }
+      25% { transform: scale(1.3); opacity: 1; }
+      50% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
@@ -106,66 +120,33 @@
 
     const targetDate = new Date("2035-05-08");
 
-    function updateDisplays() {
-      tasksLeftEl.textContent = tasksLeft;
-      tasksDoneEl.textContent = tasksDone;
-      totalTasksDoneEl.textContent = totalTasksDone;
-      streakEl.textContent = streak;
-
-      const now = new Date();
-      const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
-      dateCountEl.textContent = diff >= 0 ? diff : 0;
-
-      if (tasksDone >= celebrationThreshold) {
-        celebrationEl.style.display = "block";
-        if (!hasCelebrated) {
-          launchConfetti();
-          hasCelebrated = true;
-        }
-      } else {
-        celebrationEl.style.display = "none";
-        hasCelebrated = false;
+    function completeTask() {
+      if (tasksLeft > 0) {
+        tasksLeft--;
+        localStorage.setItem("tasksLeft", tasksLeft);
       }
 
-      if (streak >= 30) {
-        bonusMessageEl.textContent = "👑 Moose Legend Unlocked!";
-        launchConfetti("storm");
-      } else if (streak >= 7) {
-        bonusMessageEl.textContent = "🔥 You're on fire!";
-        launchConfetti("epic");
-      } else if (streak >= 3) {
-        bonusMessageEl.textContent = "🔥 Nice streak!";
-        launchConfetti();
-      } else {
-        bonusMessageEl.textContent = "";
+      tasksDone++;
+      totalTasksDone++;
+
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("totalTasksDone", totalTasksDone);
+
+      // 🧠 Live streak update when reaching goal
+      if (tasksDone >= celebrationThreshold && lastSuccessfulDate !== today) {
+        streak++;
+        lastSuccessfulDate = today;
+        localStorage.setItem("streak", streak);
+        localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
+
+        // Add animation class
+        streakEl.classList.add("streak-boost");
+        setTimeout(() => streakEl.classList.remove("streak-boost"), 1200);
       }
+
+      updateDisplays();
     }
 
-    function completeTask() {
-  if (tasksLeft > 0) {
-    tasksLeft--;
-    localStorage.setItem("tasksLeft", tasksLeft);
-  }
-
-  tasksDone++;
-  totalTasksDone++;
-
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("totalTasksDone", totalTasksDone);
-
-  // 👉 Check for streak update mid-day
-  if (tasksDone >= celebrationThreshold && lastSuccessfulDate !== today) {
-    streak++;
-    lastSuccessfulDate = today;
-    localStorage.setItem("streak", streak);
-    localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
-  }
-
-  updateDisplays();
-}
-
-    
-   
     function resetDay() {
       tasksLeft = defaultTasks;
       tasksDone = 0;
@@ -191,6 +172,42 @@
 
       localStorage.setItem("streak", streak);
       localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate || "");
+    }
+
+    function updateDisplays() {
+      tasksLeftEl.textContent = tasksLeft;
+      tasksDoneEl.textContent = tasksDone;
+      totalTasksDoneEl.textContent = totalTasksDone;
+      streakEl.textContent = streak;
+
+      const now = new Date();
+      const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+      dateCountEl.textContent = diff >= 0 ? diff : 0;
+
+      if (tasksDone >= celebrationThreshold) {
+        celebrationEl.style.display = "block";
+        if (!hasCelebrated) {
+          launchConfetti();
+          hasCelebrated = true;
+        }
+      } else {
+        celebrationEl.style.display = "none";
+        hasCelebrated = false;
+      }
+
+      // Optional streak bonus messages
+      if (streak >= 30) {
+        bonusMessageEl.textContent = "👑 Moose Legend Unlocked!";
+        launchConfetti("storm");
+      } else if (streak >= 7) {
+        bonusMessageEl.textContent = "🔥 You're on fire!";
+        launchConfetti("epic");
+      } else if (streak >= 3) {
+        bonusMessageEl.textContent = "🔥 Nice streak!";
+        launchConfetti();
+      } else {
+        bonusMessageEl.textContent = "";
+      }
     }
 
     function launchConfetti(level = "standard") {
