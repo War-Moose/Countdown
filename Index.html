@@ -39,7 +39,7 @@
   const tasksDoneEl = document.getElementById("tasksDone");
   const dateCountEl = document.getElementById("dateCount");
 
-  const defaultTasks = 5;
+  const defaultTasks = 10;
 
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
@@ -56,7 +56,7 @@
   let tasksDone = parseInt(localStorage.getItem("tasksDone") || 0, 10);
 
   const targetDate = new Date();
-  targetDate.setFullYear(targetDate.getFullYear() + 10);
+  targetDate.setFullYear(targetDate.getFullYear() + 45);
 
   function updateDisplays() {
     tasksLeftEl.textContent = tasksLeft;
