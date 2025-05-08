@@ -107,13 +107,10 @@
   <div id="menuOverlay" onclick="toggleMenu(false)"></div>
   <div id="settingsMenu">
     <h2>Settings Menu</h2>
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
     <button onclick="resetDay()">Reset Day</button>
     <button onclick="advanceDay(-1)">-1 Day</button>
     <button onclick="advanceDay(1)">+1 Day</button>
-    
-    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
-    <button onclick="exportTrackerData()">Save Backup</button>
-    <button onclick="document.getElementById('importInput').click()">Import Backup</button>
     <button onclick="toggleMenu(false)">Close</button>
   </div>
 
@@ -140,72 +137,35 @@
     }
 
     function updateStreakFromCalendar() {
-  const current = new Date(today);
-  const year = current.getFullYear();
-  const month = current.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const current = new Date(today);
+      const year = current.getFullYear();
+      const month = current.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  let currentStreak = 0;
-  let longestStreakSoFar = 0;
-  let tempStreak = 0;
+      let currentStreak = 0;
+      let longestStreakSoFar = 0;
+      let tempStreak = 0;
 
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day);
-    const key = date.toISOString().split("T")[0];
-    const val = taskLog[key] || 0;
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const key = date.toISOString().split("T")[0];
+        const val = taskLog[key] || 0;
 
-    if (val >= defaultTasks) {
-      tempStreak++;
-      if (date.toISOString().split("T")[0] === today) {
-        currentStreak = tempStreak;
-      }
-    } else {
-      if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-      tempStreak = 0;
-    }
-  }
-
-  if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-
-  streak = currentStreak;
-  longestStreak = longestStreakSoFar;
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("longestStreak", longestStreak);
-} else {
-      if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-      tempStreak = 0;
-    }
-  }
-
-  if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-
-  streak = currentStreak;
-  longestStreak = longestStreakSoFar;
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("longestStreak", longestStreak);
-}
-    } else {
-      if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-      tempStreak = 0;
-    }
-  }
-
-  if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-
-  streak = currentStreak;
-  longestStreak = longestStreakSoFar;
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("longestStreak", longestStreak);
-} else {
-          if (tempStreak > bestStreak) bestStreak = tempStreak;
+        if (val >= defaultTasks) {
+          tempStreak++;
+          if (date.toISOString().split("T")[0] === today) {
+            currentStreak = tempStreak;
+          }
+        } else {
+          if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
           tempStreak = 0;
         }
       }
 
-      if (tempStreak > bestStreak) bestStreak = tempStreak;
+      if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
 
       streak = currentStreak;
-      longestStreak = bestStreak;
+      longestStreak = longestStreakSoFar;
       localStorage.setItem("streak", streak);
       localStorage.setItem("longestStreak", longestStreak);
     }
@@ -351,4 +311,3 @@
   </script>
 </body>
 </html>
-
