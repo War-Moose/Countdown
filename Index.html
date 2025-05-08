@@ -27,18 +27,21 @@
 <body>
   <h1>Countdown Tracker</h1>
   <div>
-    <p>Manual Counter: <span id="manualCount">3652</span></p>
+    <p>Manual Counter: <span id="manualCount">...</span></p>
     <p>Days until 10 years from today: <span id="dateCount">...</span></p>
     <button onclick="decreaseCount()">Click Me</button>
   </div>
 
   <script>
-    let manualCount = 3652; // starting count
     const manualCountEl = document.getElementById("manualCount");
     const dateCountEl = document.getElementById("dateCount");
 
+    // Set target date 10 years from now
     const targetDate = new Date();
     targetDate.setFullYear(targetDate.getFullYear() + 10);
+
+    // Load saved manual count or default to 3652
+    let manualCount = parseInt(localStorage.getItem("manualCount") || "3652", 10);
 
     function updateDateCount() {
       const today = new Date();
@@ -47,14 +50,21 @@
       dateCountEl.textContent = days;
     }
 
+    function updateManualDisplay() {
+      manualCountEl.textContent = manualCount;
+    }
+
     function decreaseCount() {
       if (manualCount > 0) {
         manualCount--;
-        manualCountEl.textContent = manualCount;
+        updateManualDisplay();
+        localStorage.setItem("manualCount", manualCount);
       }
     }
 
+    // On load
     updateDateCount();
+    updateManualDisplay();
   </script>
 </body>
 </html>
