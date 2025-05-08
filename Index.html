@@ -51,10 +51,11 @@
     #celebration { color: green; }
     #bonusMessage { color: orange; }
 
-    #darkModeToggle {
-      position: fixed;
-      top: 15px;
-      right: 15px;
+    label[for="darkModeToggleSwitch"] {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 1em;
     }
 
     /* Highlight streak increase */
@@ -74,7 +75,10 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <button id="darkModeToggle" onclick="toggleDarkMode()">🌓</button>
+  <label for="darkModeToggleSwitch">
+    <input type="checkbox" id="darkModeToggleSwitch" onchange="toggleDarkMode()" />
+    Dark Mode
+  </label>
 
   <h1>Daily Task Tracker</h1>
   <div>
@@ -120,55 +124,59 @@
 
     const targetDate = new Date("2035-05-08");
 
-   function completeTask() {
-  if (tasksLeft > 0) {
-    tasksLeft--;
-    localStorage.setItem("tasksLeft", tasksLeft);
-  }
+    function completeTask() {
+      if (tasksLeft > 0) {
+        tasksLeft--;
+        localStorage.setItem("tasksLeft", tasksLeft);
+      }
 
-  tasksDone++;
-  totalTasksDone++;
+      tasksDone++;
+      totalTasksDone++;
 
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("totalTasksDone", totalTasksDone);
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("totalTasksDone", totalTasksDone);
 
-  // 🎯 Streak update only once per day
-  if (tasksDone >= celebrationThreshold && lastSuccessfulDate !== today) {
-    streak++;
-    lastSuccessfulDate = today;
-    localStorage.setItem("streak", streak);
-    localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
+      if (tasksDone >= celebrationThreshold && lastSuccessfulDate !== today) {
+        streak++;
+        lastSuccessfulDate = today;
+        localStorage.setItem("streak", streak);
+        localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
 
-    // 🚀 Offset streak glow until after confetti
-    setTimeout(() => {
-      streakEl.classList.add("streak-boost");
-      setTimeout(() => streakEl.classList.remove("streak-boost"), 1200);
-    }, 1000); // ⏱️ Delay start of animation
-  }
+        // Delay streak glow after confetti
+        setTimeout(() => {
+          streakEl.classList.add("streak-boost");
+          setTimeout(() => streakEl.classList.remove("streak-boost"), 1200);
+        }, 1000);
 
-  updateDisplays();
-}
+        // Prompt backup on 7-day streak
+        if (streak === 7) {
+          setTimeout(() => {
+            if (confirm("🎉 You've hit a 7-day streak! Would you like to download a backup of your progress?")) {
+              exportTrackerData();
+            }
+          }, 1500);
+        }
+      }
 
+      updateDisplays();
+    }
 
-   function resetDay() {
-  tasksLeft = defaultTasks;
-  tasksDone = 0;
-  //totalTasksDone = 0; // Optional: comment this out if you want to keep total count
-  streak = 0;
-  lastSuccessfulDate = "";
+    function resetDay() {
+      tasksLeft = defaultTasks;
+      tasksDone = 0;
+      hasCelebrated = false;
 
-  hasCelebrated = false;
+      // streak = 0; // Uncomment to also reset streak manually
+      // lastSuccessfulDate = "";
 
-  localStorage.setItem("tasksLeft", tasksLeft);
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("totalTasksDone", totalTasksDone);
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
-  localStorage.setItem("taskDate", today);
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      // localStorage.setItem("streak", streak);
+      // localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
+      localStorage.setItem("taskDate", today);
 
-  updateDisplays();
-}
-
+      updateDisplays();
+    }
 
     function handleStreakCarryover() {
       const prevTasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
@@ -206,7 +214,6 @@
         hasCelebrated = false;
       }
 
-      // Optional streak bonus messages
       if (streak >= 30) {
         bonusMessageEl.textContent = "👑 Moose Legend Unlocked!";
         launchConfetti("storm");
@@ -231,12 +238,41 @@
     function toggleDarkMode() {
       const isDark = document.body.classList.toggle("dark");
       localStorage.setItem("darkMode", isDark ? "true" : "false");
+
+      const toggleSwitch = document.getElementById("darkModeToggleSwitch");
+      if (toggleSwitch) toggleSwitch.checked = isDark;
     }
 
     function loadDarkModePreference() {
-      if (localStorage.getItem("darkMode") === "true") {
+      const isDark = localStorage.getItem("darkMode") === "true";
+      if (isDark) {
         document.body.classList.add("dark");
       }
+
+      const toggleSwitch = document.getElementById("darkModeToggleSwitch");
+      if (toggleSwitch) toggleSwitch.checked = isDark;
+    }
+
+    function exportTrackerData() {
+      const data = {
+        tasksLeft,
+        tasksDone,
+        totalTasksDone,
+        streak,
+        lastSuccessfulDate,
+        dateExported: new Date().toISOString()
+      };
+
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `task-tracker-backup-${today}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     // Init
