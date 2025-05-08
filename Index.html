@@ -134,9 +134,18 @@
       document.body.classList.toggle("dark");
     }
 
-    function toggleMenu(show) {
-      document.getElementById("settingsMenu").style.display = show ? "block" : "none";
-      document.getElementById("menuOverlay").style.display = show ? "block" : "none";
+    function toggleMenu(show = null) {
+      const menu = document.getElementById("settingsMenu");
+      const overlay = document.getElementById("menuOverlay");
+
+      if (show === null) {
+        const isVisible = menu.style.display === "block";
+        menu.style.display = isVisible ? "none" : "block";
+        overlay.style.display = isVisible ? "none" : "block";
+      } else {
+        menu.style.display = show ? "block" : "none";
+        overlay.style.display = show ? "block" : "none";
+      }
     }
 
     function exportTrackerData() {
@@ -181,7 +190,7 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key.toLowerCase() === "m" && !e.repeat) {
-        toggleMenu(true);
+        toggleMenu();
       }
     });
 
