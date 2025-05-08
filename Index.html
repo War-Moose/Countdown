@@ -58,7 +58,6 @@
       font-size: 1em;
     }
 
-    /* Highlight streak increase */
     .streak-boost {
       animation: streakPop 1s ease-in-out;
       color: gold;
@@ -90,6 +89,8 @@
 
     <button onclick="completeTask()">Complete Task</button>
     <button onclick="resetDay()">Reset Day</button>
+    <input type="file" id="importInput" accept=".json" style="display: none" />
+    <button onclick="document.getElementById('importInput').click()">Import Backup</button>
 
     <div id="celebration">🎉 YOU BEAT THE GOAL! 🎉</div>
     <div id="bonusMessage"></div>
@@ -142,13 +143,11 @@
         localStorage.setItem("streak", streak);
         localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
 
-        // Delay streak glow after confetti
         setTimeout(() => {
           streakEl.classList.add("streak-boost");
           setTimeout(() => streakEl.classList.remove("streak-boost"), 1200);
         }, 1000);
 
-        // Prompt backup on 7-day streak
         if (streak === 7) {
           setTimeout(() => {
             if (confirm("🎉 You've hit a 7-day streak! Would you like to download a backup of your progress?")) {
@@ -166,13 +165,8 @@
       tasksDone = 0;
       hasCelebrated = false;
 
-      // streak = 0; // Uncomment to also reset streak manually
-      // lastSuccessfulDate = "";
-
       localStorage.setItem("tasksLeft", tasksLeft);
       localStorage.setItem("tasksDone", tasksDone);
-      // localStorage.setItem("streak", streak);
-      // localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
       localStorage.setItem("taskDate", today);
 
       updateDisplays();
@@ -275,7 +269,41 @@
       document.body.removeChild(link);
     }
 
-    // Init
+    document.getElementById("importInput").addEventListener("change", function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = JSON.parse(e.target.result);
+
+          if (
+            typeof data.tasksLeft === "number" &&
+            typeof data.tasksDone === "number" &&
+            typeof data.totalTasksDone === "number" &&
+            typeof data.streak === "number"
+          ) {
+            localStorage.setItem("tasksLeft", data.tasksLeft);
+            localStorage.setItem("tasksDone", data.tasksDone);
+            localStorage.setItem("totalTasksDone", data.totalTasksDone);
+            localStorage.setItem("streak", data.streak);
+            localStorage.setItem("lastSuccessfulDate", data.lastSuccessfulDate || "");
+            localStorage.setItem("taskDate", today);
+
+            alert("✅ Backup imported successfully!");
+            location.reload();
+          } else {
+            alert("❌ Invalid backup format.");
+          }
+        } catch (err) {
+          alert("❌ Error reading backup file.");
+        }
+      };
+
+      reader.readAsText(file);
+    });
+
     loadDarkModePreference();
     updateDisplays();
   </script>
