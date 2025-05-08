@@ -226,8 +226,10 @@
     expectedPrev.setDate(expectedPrev.getDate() - 1);
     const expectedPrevStr = expectedPrev.toISOString().split("T")[0];
 
-    if (prevDone >= defaultTasks && prevDate === expectedPrevStr) {
+    if (prevDone >= defaultTasks && prevDate === expectedPrevStr && lastSuccessfulDate !== today) {
       streak++;
+      lastSuccessfulDate = today;
+      localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
     } else {
       streak = 0;
     }
