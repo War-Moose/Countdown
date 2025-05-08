@@ -96,19 +96,7 @@
       localStorage.setItem("tasksDone", tasksDone);
       updateDisplays();
     }
-
-    // 👇 Easily removable reset function and button
-    function resetDay() {
-      tasksLeft = defaultTasks;
-      tasksDone = 0;
-      localStorage.setItem("tasksLeft", tasksLeft);
-      localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("taskDate", new Date().toISOString().split("T")[0]);
-      updateDisplays();
-    }
-
-    updateDisplays();
-    let hasCelebrated = false; // Avoids spamming confetti
+let hasCelebrated = false; // Avoids spamming confetti
 
 function launchConfetti() {
   confetti({
@@ -138,6 +126,18 @@ function updateDisplays() {
     hasCelebrated = false; // Reset if they fall back under
   }
 }
+
+    // 👇 Easily removable reset function and button
+    function resetDay() {
+      tasksLeft = defaultTasks;
+      tasksDone = 0;
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("taskDate", new Date().toISOString().split("T")[0]);
+      updateDisplays();
+    }
+
+    updateDisplays();
 
   </script>
 </body>
