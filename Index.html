@@ -14,7 +14,7 @@
       font-size: 2em;
     }
     .counter {
-      font-size: 2em;
+      font-size: 1.5em;
       margin: 10px 0;
     }
     button {
@@ -23,15 +23,19 @@
       cursor: pointer;
       margin: 10px;
     }
-    #celebration {
-      font-size: 1.5em;
-      color: green;
+    #celebration, #bonusMessage {
+      font-size: 1.4em;
       font-weight: bold;
       margin-top: 20px;
-      display: none;
+    }
+    #celebration {
+      color: green;
+    }
+    #bonusMessage {
+      color: orange;
     }
   </style>
-  <!-- 🎉 Confetti Script -->
+  <!-- 🎉 Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
@@ -40,73 +44,88 @@
     <p class="counter">Daily Tasks Left: <span id="tasksLeft">...</span></p>
     <p class="counter">Daily Tasks Completed: <span id="tasksDone">...</span></p>
     <p class="counter">Total Tasks Completed: <span id="totalTasksDone">...</span></p>
+    <p class="counter">Current Streak: <span id="streak">0</span> days</p>
     <p>Days until 10 years from today: <span id="dateCount">...</span></p>
 
     <button onclick="completeTask()">Complete Task</button>
-
-    <!-- 👇 Optional Reset Button -->
     <button onclick="resetDay()">Reset Day</button>
 
-    <!-- 🎉 Celebration Message -->
     <div id="celebration">🎉 YOU BEAT THE GOAL! 🎉</div>
+    <div id="bonusMessage"></div>
   </div>
 
   <script>
     const defaultTasks = 5;
-    const celebrationThreshold = 5; // You can change this number
+    const celebrationThreshold = 5;
 
     const tasksLeftEl = document.getElementById("tasksLeft");
     const tasksDoneEl = document.getElementById("tasksDone");
     const totalTasksDoneEl = document.getElementById("totalTasksDone");
+    const streakEl = document.getElementById("streak");
     const dateCountEl = document.getElementById("dateCount");
     const celebrationEl = document.getElementById("celebration");
+    const bonusMessageEl = document.getElementById("bonusMessage");
 
     const today = new Date().toISOString().split("T")[0];
     const savedDate = localStorage.getItem("taskDate");
 
     if (savedDate !== today) {
+      handleStreakCarryover(); // Evaluate streak based on yesterday's performance
       resetDay();
     }
 
-    let tasksLeft = parseInt(localStorage.getItem("tasksLeft"));
-    if (isNaN(tasksLeft)) tasksLeft = defaultTasks;
-
-    let tasksDone = parseInt(localStorage.getItem("tasksDone"));
-    if (isNaN(tasksDone)) tasksDone = 0;
-
-    let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone"));
-    if (isNaN(totalTasksDone)) totalTasksDone = 0;
+    let tasksLeft = parseInt(localStorage.getItem("tasksLeft")) || defaultTasks;
+    let tasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
+    let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
+    let streak = parseInt(localStorage.getItem("streak")) || 0;
+    let lastSuccessfulDate = localStorage.getItem("lastSuccessfulDate");
 
     const targetDate = new Date("2035-05-08");
-
     let hasCelebrated = false;
 
-    function launchConfetti() {
-      confetti({
-        particleCount: 150,
-        spread: 80,
-        origin: { y: 0.6 }
-      });
+    function launchConfetti(level = "standard") {
+      let config = { particleCount: 150, spread: 60, origin: { y: 0.6 } };
+
+      if (level === "epic") config = { particleCount: 300, spread: 120 };
+      if (level === "storm") config = { particleCount: 500, spread: 160 };
+
+      confetti(config);
     }
 
     function updateDisplays() {
       tasksLeftEl.textContent = tasksLeft;
       tasksDoneEl.textContent = tasksDone;
       totalTasksDoneEl.textContent = totalTasksDone;
+      streakEl.textContent = streak;
 
       const now = new Date();
       const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
       dateCountEl.textContent = diff >= 0 ? diff : 0;
 
-      if (tasksDone > celebrationThreshold) {
+      if (tasksDone >= celebrationThreshold) {
         celebrationEl.style.display = "block";
+
         if (!hasCelebrated) {
-          launchConfetti();
+          launchConfetti(); // Regular confetti for reaching daily goal
           hasCelebrated = true;
         }
       } else {
         celebrationEl.style.display = "none";
         hasCelebrated = false;
+      }
+
+      // Bonus messages by streak length
+      if (streak >= 30) {
+        bonusMessageEl.textContent = "👑 Moose Legend Unlocked!";
+        launchConfetti("storm");
+      } else if (streak >= 7) {
+        bonusMessageEl.textContent = "🔥🦌 Flame Antlers Engaged!";
+        launchConfetti("epic");
+      } else if (streak >= 3) {
+        bonusMessageEl.textContent = "🔥 You're heating up!";
+        launchConfetti();
+      } else {
+        bonusMessageEl.textContent = "";
       }
     }
 
@@ -115,6 +134,7 @@
         tasksLeft--;
         localStorage.setItem("tasksLeft", tasksLeft);
       }
+
       tasksDone++;
       totalTasksDone++;
 
@@ -131,9 +151,25 @@
 
       localStorage.setItem("tasksLeft", tasksLeft);
       localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("taskDate", new Date().toISOString().split("T")[0]);
+      localStorage.setItem("taskDate", today);
 
       updateDisplays();
+    }
+
+    function handleStreakCarryover() {
+      // Only counts as a "streak day" if yesterday's tasks met the goal
+      const prevTasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
+      const prevDate = localStorage.getItem("taskDate");
+
+      if (prevDate && prevTasksDone >= celebrationThreshold) {
+        streak++;
+        lastSuccessfulDate = prevDate;
+      } else {
+        streak = 0;
+      }
+
+      localStorage.setItem("streak", streak);
+      localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate || "");
     }
 
     updateDisplays();
