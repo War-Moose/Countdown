@@ -197,10 +197,10 @@
     }
 
     function advanceDay(offset) {
-      const newDate = new Date(today);
-      newDate.setDate(newDate.getDate() + offset);
-      today = newDate.toISOString().split("T")[0];
-      resetDay();
+  const newDate = new Date(today);
+  newDate.setDate(newDate.getDate() + offset);
+  today = newDate.toISOString().split("T")[0];
+  updateDisplays();
     }
 
     function toggleDarkMode() {
