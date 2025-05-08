@@ -34,42 +34,50 @@
     <button onclick="completeTask()">Complete Task</button>
   </div>
 
-  <script>
-    const tasksLeftEl = document.getElementById("tasksLeft");
-    const tasksDoneEl = document.getElementById("tasksDone");
-    const dateCountEl = document.getElementById("dateCount");
+<script>
+  const tasksLeftEl = document.getElementById("tasksLeft");
+  const tasksDoneEl = document.getElementById("tasksDone");
+  const dateCountEl = document.getElementById("dateCount");
 
-    // Default daily task count
-    const defaultTasks = 5;
+  const defaultTasks = 5;
 
-    // Load or initialize values from localStorage
-    let tasksLeft = parseInt(localStorage.getItem("tasksLeft") || defaultTasks, 10);
-    let tasksDone = parseInt(localStorage.getItem("tasksDone") || 0, 10);
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
+  const savedDate = localStorage.getItem("taskDate");
 
-    // Set target date
-    const targetDate = new Date();
-    targetDate.setFullYear(targetDate.getFullYear() + 10);
+  // If it's a new day, reset
+  if (savedDate !== today) {
+    localStorage.setItem("tasksLeft", defaultTasks);
+    localStorage.setItem("tasksDone", 0);
+    localStorage.setItem("taskDate", today);
+  }
 
-    function updateDisplays() {
-      tasksLeftEl.textContent = tasksLeft;
-      tasksDoneEl.textContent = tasksDone;
+  let tasksLeft = parseInt(localStorage.getItem("tasksLeft") || defaultTasks, 10);
+  let tasksDone = parseInt(localStorage.getItem("tasksDone") || 0, 10);
 
-      const today = new Date();
-      const diff = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
-      dateCountEl.textContent = diff;
+  const targetDate = new Date();
+  targetDate.setFullYear(targetDate.getFullYear() + 10);
+
+  function updateDisplays() {
+    tasksLeftEl.textContent = tasksLeft;
+    tasksDoneEl.textContent = tasksDone;
+
+    const now = new Date();
+    const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+    dateCountEl.textContent = diff;
+  }
+
+  function completeTask() {
+    if (tasksLeft > 0) {
+      tasksLeft--;
+      tasksDone++;
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      updateDisplays();
     }
+  }
 
-    function completeTask() {
-      if (tasksLeft > 0) {
-        tasksLeft--;
-        tasksDone++;
-        localStorage.setItem("tasksLeft", tasksLeft);
-        localStorage.setItem("tasksDone", tasksDone);
-        updateDisplays();
-      }
-    }
-
-    updateDisplays();
-  </script>
+  updateDisplays();
+</script>
 </body>
 </html>
