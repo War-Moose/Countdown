@@ -132,6 +132,10 @@
 
     if (savedDate !== today) {
   tasksDone = 0;
+  tasksLeft = defaultTasks;
+  localStorage.setItem("tasksDone", tasksDone);
+  localStorage.setItem("tasksLeft", tasksLeft);
+  tasksDone = 0;
   localStorage.setItem("tasksDone", tasksDone);
   tasksDone = 0;
   localStorage.setItem("tasksDone", tasksDone);
@@ -208,6 +212,15 @@
   const newDate = new Date(today);
   newDate.setDate(newDate.getDate() + offset);
   today = newDate.toISOString().split("T")[0];
+
+  if (today !== localStorage.getItem("taskDate")) {
+    tasksDone = 0;
+    tasksLeft = defaultTasks;
+    localStorage.setItem("tasksDone", tasksDone);
+    localStorage.setItem("tasksLeft", tasksLeft);
+    localStorage.setItem("taskDate", today);
+  }
+
   updateDisplays();
     }
 
