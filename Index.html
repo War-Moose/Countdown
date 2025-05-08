@@ -31,6 +31,7 @@
       display: none;
     }
   </style>
+  <!-- 🎉 Confetti Script -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
@@ -40,9 +41,10 @@
     <p class="counter">Daily Tasks Completed: <span id="tasksDone">...</span></p>
     <p class="counter">Total Tasks Completed: <span id="totalTasksDone">...</span></p>
     <p>Days until 10 years from today: <span id="dateCount">...</span></p>
+
     <button onclick="completeTask()">Complete Task</button>
 
-    <!-- 👇 Optional Reset Button (can be removed easily) -->
+    <!-- 👇 Optional Reset Button -->
     <button onclick="resetDay()">Reset Day</button>
 
     <!-- 🎉 Celebration Message -->
@@ -51,20 +53,16 @@
 
   <script>
     const defaultTasks = 5;
-    const celebrationThreshold = 5; // Change this to your desired goal number
+    const celebrationThreshold = 5; // You can change this number
 
     const tasksLeftEl = document.getElementById("tasksLeft");
     const tasksDoneEl = document.getElementById("tasksDone");
+    const totalTasksDoneEl = document.getElementById("totalTasksDone");
     const dateCountEl = document.getElementById("dateCount");
     const celebrationEl = document.getElementById("celebration");
 
     const today = new Date().toISOString().split("T")[0];
     const savedDate = localStorage.getItem("taskDate");
-    const totalTasksDoneEl = document.getElementById("totalTasksDone");
-
-// Load total completed tasks or default to 0
-let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone"));
-if (isNaN(totalTasksDone)) totalTasksDone = 0;
 
     if (savedDate !== today) {
       resetDay();
@@ -76,11 +74,25 @@ if (isNaN(totalTasksDone)) totalTasksDone = 0;
     let tasksDone = parseInt(localStorage.getItem("tasksDone"));
     if (isNaN(tasksDone)) tasksDone = 0;
 
+    let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone"));
+    if (isNaN(totalTasksDone)) totalTasksDone = 0;
+
     const targetDate = new Date("2035-05-08");
+
+    let hasCelebrated = false;
+
+    function launchConfetti() {
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+    }
 
     function updateDisplays() {
       tasksLeftEl.textContent = tasksLeft;
       tasksDoneEl.textContent = tasksDone;
+      totalTasksDoneEl.textContent = totalTasksDone;
 
       const now = new Date();
       const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
@@ -88,8 +100,13 @@ if (isNaN(totalTasksDone)) totalTasksDone = 0;
 
       if (tasksDone > celebrationThreshold) {
         celebrationEl.style.display = "block";
+        if (!hasCelebrated) {
+          launchConfetti();
+          hasCelebrated = true;
+        }
       } else {
         celebrationEl.style.display = "none";
+        hasCelebrated = false;
       }
     }
 
@@ -99,74 +116,27 @@ if (isNaN(totalTasksDone)) totalTasksDone = 0;
         localStorage.setItem("tasksLeft", tasksLeft);
       }
       tasksDone++;
+      totalTasksDone++;
+
       localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("totalTasksDone", totalTasksDone);
+
       updateDisplays();
     }
-let hasCelebrated = false; // Avoids spamming confetti
 
-function launchConfetti() {
-  confetti({
-    particleCount: 150,
-    spread: 80,
-    origin: { y: 0.6 }
-  });
-}
-
-function updateDisplays() {
-  tasksLeftEl.textContent = tasksLeft;
-  tasksDoneEl.textContent = tasksDone;
-
-  const now = new Date();
-  const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
-  dateCountEl.textContent = diff >= 0 ? diff : 0;
-
-  if (tasksDone > celebrationThreshold) {
-    celebrationEl.style.display = "block";
-
-    if (!hasCelebrated) {
-      launchConfetti();
-      hasCelebrated = true;
-    }
-  } else {
-    celebrationEl.style.display = "none";
-    hasCelebrated = false; // Reset if they fall back under
-  }
-}
-function completeTask() {
-  if (tasksLeft > 0) {
-    tasksLeft--;
-    localStorage.setItem("tasksLeft", tasksLeft);
-  }
-
-  tasksDone++;
-  totalTasksDone++;
-
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("totalTasksDone", totalTasksDone);
-
-  updateDisplays();
-}
-
-// Update display function now includes this:
-function updateDisplays() {
-  tasksLeftEl.textContent = tasksLeft;
-  tasksDoneEl.textContent = tasksDone;
-  totalTasksDoneEl.textContent = totalTasksDone;
-
-  // ... rest remains the same ...
-}
-    // 👇 Easily removable reset function and button
     function resetDay() {
       tasksLeft = defaultTasks;
       tasksDone = 0;
+      hasCelebrated = false;
+
       localStorage.setItem("tasksLeft", tasksLeft);
       localStorage.setItem("tasksDone", tasksDone);
       localStorage.setItem("taskDate", new Date().toISOString().split("T")[0]);
+
       updateDisplays();
     }
 
     updateDisplays();
-
   </script>
 </body>
 </html>
