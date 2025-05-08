@@ -93,6 +93,7 @@
   <p class="counter">Daily Tasks Completed: <span id="tasksDone"></span></p>
   <p class="counter">Total Tasks Completed: <span id="totalTasksDone"></span></p>
   <p class="counter">Current Streak: <span id="streak"></span> days</p>
+  <p class="counter">Longest Streak: <span id="longestStreak"></span> days</p>
     <button onclick="completeTask()">Complete Task</button>
   <button onclick="resetDay()">Reset Day</button>
   <button onclick="advanceDay(-1)">-1 Day</button>
@@ -123,6 +124,7 @@
     let tasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
     let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
     let streak = parseInt(localStorage.getItem("streak")) || 0;
+    let longestStreak = parseInt(localStorage.getItem("longestStreak")) || 0;
     let lastSuccessfulDate = localStorage.getItem("lastSuccessfulDate") || "";
     let savedDate = localStorage.getItem("taskDate");
     let hasCelebrated = false;
@@ -149,6 +151,10 @@
     localStorage.setItem("lastSuccessfulDate", lastSuccessfulDate);
   } else {
     streak = 0;
+    if (streak > longestStreak) {
+      longestStreak = streak;
+      localStorage.setItem("longestStreak", longestStreak);
+    }
     localStorage.setItem("streak", streak);
   }
   resetDay();
@@ -159,6 +165,7 @@
       document.getElementById("tasksDone").textContent = tasksDone;
       document.getElementById("totalTasksDone").textContent = totalTasksDone;
       document.getElementById("streak").textContent = streak;
+      document.getElementById("longestStreak").textContent = longestStreak;
       document.getElementById("currentDate").textContent = today;
 
       const diff = Math.ceil((targetDate - new Date(today)) / (1000 * 60 * 60 * 24));
