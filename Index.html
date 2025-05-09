@@ -142,7 +142,7 @@
   <p class="counter">Current Streak: <span id="streak"></span> days</p>
   <p class="counter">Longest Streak: <span id="longestStreak"></span> days</p>
 
-  <!-- Controls -->
+  <!-- Controls (Menu button added) -->
   <button onclick="completeTask()">Complete Task</button>
   <button onclick="resetDay()">Reset Day</button>
   <button onclick="advanceDay(-1)">-1 Day</button>
@@ -150,6 +150,7 @@
   <button onclick="exportTrackerData()">Save Backup</button>
   <input type="file" id="importInput" accept=".json" style="display:none" />
   <button onclick="document.getElementById('importInput').click()">Import Backup</button>
+  <button onclick="toggleMenu()">Menu</button>
 
   <!-- Calendar -->
   <div class="calendar" id="calendar"></div>
@@ -179,7 +180,7 @@
   <div id="badgePopup"></div>
 
   <script>
-    // Basic state
+    // Initialization
     const defaultTasks = 3;
     let now    = new Date();
     let today  = now.toISOString().split("T")[0];
@@ -192,7 +193,7 @@
     const taskLog      = JSON.parse(localStorage.getItem("taskLog") || "{}");
     let savedDate      = localStorage.getItem("taskDate");
 
-    // New-day reset of daily counts only
+    // Daily reset of tasks only
     if (savedDate !== today) {
       tasksDone = 0;
       tasksLeft = defaultTasks;
@@ -201,7 +202,7 @@
       localStorage.setItem("taskDate", today);
     }
 
-    // Load or initialize badges
+    // Load or init badges
     let badges = JSON.parse(localStorage.getItem("badges"));
     if (!Array.isArray(badges) || badges.length !== 3) {
       badges = [
@@ -212,7 +213,7 @@
       localStorage.setItem("badges", JSON.stringify(badges));
     }
 
-    // Full-history longest streak calculator
+    // Full-history longest streak
     function calculateLongestStreak() {
       const doneDates = Object.keys(taskLog)
         .filter(d => taskLog[d] >= defaultTasks)
@@ -248,7 +249,7 @@
       localStorage.setItem("longestStreak", longestStreak);
     }
 
-    // Badge checking
+    // Badge logic
     function checkBadges() {
       let updated = false;
       badges.forEach(b => {
@@ -261,7 +262,6 @@
       if (updated) localStorage.setItem("badges", JSON.stringify(badges));
     }
 
-    // Render badge grid
     function initializeBadges() {
       const grid = document.getElementById("badgeGrid");
       grid.innerHTML = "";
@@ -275,7 +275,6 @@
       });
     }
 
-    // Draw calendar
     function drawCalendar() {
       const cal = document.getElementById("calendar");
       cal.innerHTML = "";
@@ -291,7 +290,7 @@
       }
     }
 
-    // Title badges updater
+    // Title badges
     function updateTitleBadges() {
       const leftId  = localStorage.getItem("titleBadgeLeft");
       const rightId = localStorage.getItem("titleBadgeRight");
@@ -299,16 +298,13 @@
       const leftEl  = document.getElementById("badgeLeft");
       const rightEl = document.getElementById("badgeRight");
       if (map[leftId]) {
-        leftEl.textContent = "🏅";
-        leftEl.title       = map[leftId].name;
+        leftEl.textContent = "🏅"; leftEl.title = map[leftId].name;
       } else leftEl.textContent = "";
       if (map[rightId]) {
-        rightEl.textContent = "🏅";
-        rightEl.title       = map[rightId].name;
+        rightEl.textContent = "🏅"; rightEl.title = map[rightId].name;
       } else rightEl.textContent = "";
     }
 
-    // Populate title badge selectors
     function initTitleBadgeSelectors() {
       const selL = document.getElementById("selectLeftBadge");
       const selR = document.getElementById("selectRightBadge");
@@ -317,8 +313,8 @@
         o1.value = b.id; o1.textContent = b.name; selL.appendChild(o1);
         const o2 = o1.cloneNode(true); selR.appendChild(o2);
       });
-      selL.value = localStorage.getItem("titleBadgeLeft") || badges[0].id;
-      selR.value = localStorage.getItem("titleBadgeRight")|| badges[1].id;
+      selL.value = localStorage.getItem("titleBadgeLeft")  || badges[0].id;
+      selR.value = localStorage.getItem("titleBadgeRight") || badges[1].id;
       selL.onchange = e => {
         localStorage.setItem("titleBadgeLeft", e.target.value);
         updateTitleBadges();
@@ -329,7 +325,6 @@
       };
     }
 
-    // Update all displays
     function updateDisplays() {
       document.getElementById("currentDate").textContent     = today;
       document.getElementById("tasksLeft").textContent      = tasksLeft;
@@ -344,7 +339,6 @@
       updateTitleBadges();
     }
 
-    // Complete Task
     function completeTask() {
       if (tasksLeft > 0) tasksLeft--;
       tasksDone++; totalTasksDone++;
@@ -378,39 +372,35 @@
       }
     }
 
-    // Reset Day
     function resetDay() {
       tasksDone = 0; tasksLeft = defaultTasks;
       delete taskLog[today];
       localStorage.setItem("tasksLeft", tasksLeft);
       localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("taskLog", JSON.stringify(taskLog));
+      localStorage.setItem("taskLog",   JSON.stringify(taskLog));
       updateDisplays();
     }
 
-    // Reset Total Tasks
     function resetTotalTasks() {
       totalTasksDone = 0;
       localStorage.setItem("totalTasksDone", 0);
       badges.forEach(b => {
-        if (b.id==="badge_first" || b.id==="badge_five") b.unlocked = false;
+        if (b.id==="badge_first"||b.id==="badge_five") b.unlocked=false;
       });
       localStorage.setItem("badges", JSON.stringify(badges));
       updateDisplays();
       alert("Total tasks and relevant badges reset.");
     }
 
-    // Reset Badges
     function resetBadges() {
-      badges.forEach(b => b.unlocked = false);
+      badges.forEach(b => b.unlocked=false);
       localStorage.setItem("badges", JSON.stringify(badges));
       initializeBadges();
     }
 
-    // Advance Day
     function advanceDay(offset) {
       const d = new Date(today);
-      d.setDate(d.getDate() + offset);
+      d.setDate(d.getDate()+offset);
       today = d.toISOString().split("T")[0];
       if (today !== localStorage.getItem("taskDate")) {
         tasksDone = 0; tasksLeft = defaultTasks;
@@ -421,7 +411,6 @@
       updateDisplays();
     }
 
-    // Export / Import
     function exportTrackerData() {
       const data = {
         tasksLeft, tasksDone, totalTasksDone,
@@ -433,6 +422,7 @@
       a.href = url; a.download = `backup-${today}.json`;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
+
     function importTrackerData(evt) {
       const file = evt.target.files[0];
       if (!file) return;
@@ -460,7 +450,6 @@
       reader.readAsText(file);
     }
 
-    // Badge popup
     function showBadgePopup(name) {
       const p = document.getElementById("badgePopup");
       p.textContent = `🏆 Badge Unlocked: ${name}!`;
@@ -468,7 +457,6 @@
       setTimeout(() => p.style.display = "none", 3000);
     }
 
-    // Dark mode & menu toggles
     function toggleDarkMode() {
       const isDark = document.body.classList.toggle("dark");
       localStorage.setItem("darkMode", isDark);
@@ -486,17 +474,13 @@
       m.style.display = open ? "block" : "none";
     }
 
-    // Event listeners
     document.getElementById("importInput").addEventListener("change", importTrackerData);
     document.addEventListener("keydown", e => {
       if (e.key.toLowerCase() === "d") toggleDarkMode();
       if (e.key.toLowerCase() === "m") toggleMenu();
     });
-    if (localStorage.getItem("darkMode") === "true") {
-      document.body.classList.add("dark");
-    }
+    if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark");
 
-    // Init
     initTitleBadgeSelectors();
     updateDisplays();
   </script>
