@@ -92,7 +92,16 @@
 
   <div class="calendar" id="calendar"></div>
   <div id="menuOverlay" onclick="toggleMenu(false)"></div>
-  $1
+  <div id="settingsMenu">
+  <button onclick="toggleBadgeModal()">Badges</button>
+  <button onclick="resetTotalTasks()">Reset Total Tasks</button>
+  <h2>Settings Menu</h2>
+  <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  <button onclick="resetDay()">Reset Day</button>
+  <button onclick="advanceDay(-1)">-1 Day</button>
+  <button onclick="advanceDay(1)">+1 Day</button>
+  <button onclick="toggleMenu(false)">Close</button>
+</div>
     <button onclick="toggleBadgeModal()">Badges</button>
     <button onclick="resetTotalTasks()">Reset Total Tasks</button>
     <h2>Settings Menu</h2>
@@ -373,5 +382,14 @@ function initializeBadges() {
 </div>
 <div id="badgePopup" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:15px 30px; border-radius:8px; z-index:3000; box-shadow:0 0 10px #000; font-weight:bold;"></div>
 
-$1
+<div id="settingsMenu">
+  <button onclick="toggleBadgeModal()">Badges</button>
+  <button onclick="resetTotalTasks()">Reset Total Tasks</button>
+  <h2>Settings Menu</h2>
+  <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  <button onclick="resetDay()">Reset Day</button>
+  <button onclick="advanceDay(-1)">-1 Day</button>
+  <button onclick="advanceDay(1)">+1 Day</button>
+  <button onclick="toggleMenu(false)">Close</button>
+</div>
 </html>
