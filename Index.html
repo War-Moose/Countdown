@@ -197,9 +197,8 @@ function completeTask() {
   localStorage.setItem("tasksDone", tasksDone);
   localStorage.setItem("totalTasksDone", totalTasksDone);
   localStorage.setItem("taskLog", JSON.stringify(taskLog));
-  initializeBadges();
-updateDisplays();
   checkBadges();
+  updateDisplays();
 }
 
 function resetDay() {
