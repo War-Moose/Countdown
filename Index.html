@@ -100,19 +100,10 @@
     <button onclick="resetDay()">Reset Day</button>
     <button onclick="advanceDay(-1)">-1 Day</button>
     <button onclick="advanceDay(1)">+1 Day</button>
-    <button onclick="showBadgeModal()">Badges</button>
     <button onclick="toggleMenu(false)">Close</button>
   </div>
 
-<!-- Badge Modal -->
-<div id="badgeModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:20px; border-radius:10px; z-index:2000; max-width:600px; text-align:center;">
-  <h2>Achievements</h2>
-  <div id="badgeGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap:15px; justify-items:center; margin-top: 20px;"></div>
-  <button onclick="document.getElementById('badgeModal').style.display='none'">Close</button>
-</div>
-
-<!-- Confetti and Popup -->
-<div id="badgePopup" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:15px 30px; border-radius:8px; z-index:3000; box-shadow:0 0 10px #000; font-weight:bold;"></div>
+  <script>
     const defaultTasks = 3;
     let now = new Date();
     let today = now.toISOString().split("T")[0];
@@ -186,7 +177,6 @@
       localStorage.setItem("totalTasksDone", totalTasksDone);
       localStorage.setItem("taskLog", JSON.stringify(taskLog));
       updateDisplays();
-    loadBadges();
     }
 
     function resetDay() {
