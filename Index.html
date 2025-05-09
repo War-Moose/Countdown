@@ -336,12 +336,36 @@ function showBadgePopup(name) {
 
 function checkBadges() {
   let updated = false;
-  badges.forEach(badge => {
-    if (badge.id === "badge_first" && totalTasksDone >= 1 && !badge.unlocked) {
-      badge.unlocked = true;
-      showBadgePopup(badge.name);
-      updated = true;
-    }
+
+  const currentBadges = badges.reduce((acc, badge) => {
+    acc[badge.id] = badge;
+    return acc;
+  }, {});
+
+  if (totalTasksDone >= 1 && !currentBadges["badge_first"].unlocked) {
+    currentBadges["badge_first"].unlocked = true;
+    showBadgePopup(currentBadges["badge_first"].name);
+    updated = true;
+  }
+
+  if (totalTasksDone >= 5 && !currentBadges["badge_five"].unlocked) {
+    currentBadges["badge_five"].unlocked = true;
+    showBadgePopup(currentBadges["badge_five"].name);
+    updated = true;
+  }
+
+  if (streak >= 3 && !currentBadges["badge_streak3"].unlocked) {
+    currentBadges["badge_streak3"].unlocked = true;
+    showBadgePopup(currentBadges["badge_streak3"].name);
+    updated = true;
+  }
+
+  if (updated) {
+    badges = Object.values(currentBadges);
+    localStorage.setItem("badges", JSON.stringify(badges));
+    initializeBadges();
+  }
+}
     if (badge.id === "badge_five" && totalTasksDone >= 5 && !badge.unlocked) {
       badge.unlocked = true;
       showBadgePopup(badge.name);
