@@ -160,10 +160,6 @@ function updateStreakFromCalendar() {
   longestStreak = longestStreakSoFar;
   localStorage.setItem("streak", streak);
   localStorage.setItem("longestStreak", longestStreak);
-} 
-
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("longestStreak", longestStreak);
 }
 
 function updateDisplays() {
@@ -188,6 +184,7 @@ function completeTask() {
   localStorage.setItem("totalTasksDone", totalTasksDone);
   localStorage.setItem("taskLog", JSON.stringify(taskLog));
   updateStreakFromCalendar();
+  updateDisplays();
   checkBadges();
   updateDisplays();
 }
