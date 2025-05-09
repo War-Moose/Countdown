@@ -343,26 +343,13 @@ function checkBadges() {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
-      } else if (badge.id === "badge_five" && totalTasksDone === 5) {
-        badge.unlocked = true;
-        showBadgePopup(badge.name);
-        updated = true;
-      } else if (badge.id === "badge_streak3" && streak === 3) {
+      }
+      if (badge.id === "badge_five" && totalTasksDone === 5) {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
       }
-    }
-  });
-  if (updated) {
-    localStorage.setItem("badges", JSON.stringify(badges));
-    initializeBadges();
-  }
-} else if (badge.id === "badge_five" && totalTasksDone >= 5) {
-        badge.unlocked = true;
-        showBadgePopup(badge.name);
-        updated = true;
-      } else if (badge.id === "badge_streak3" && streak >= 3) {
+      if (badge.id === "badge_streak3" && streak === 3) {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
