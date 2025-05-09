@@ -137,20 +137,24 @@ if (savedDate !== today) {
 
 function updateStreakFromCalendar() {
   const current = new Date(today);
-  const year = current.getFullYear();
-  const month = current.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  let currentStreak = 0;
-  let longestStreakSoFar = 0;
-  let tempStreak = 0;
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day);
-    const key = date.toISOString().split("T")[0];
-    const val = taskLog[key] || 0;
-    if (val >= defaultTasks) {
-      tempStreak++;
-      if (key === today) currentStreak = tempStreak;
-    } else {
+  const yesterday = new Date(current);
+  yesterday.setDate(current.getDate() - 1);
+  const yesterdayKey = yesterday.toISOString().split("T")[0];
+
+  let yesterdayMetGoal = (taskLog[yesterdayKey] || 0) >= defaultTasks;
+  let todayMetGoal = (taskLog[today] || 0) >= defaultTasks;
+
+  if (todayMetGoal) {
+    streak = yesterdayMetGoal ? streak + 1 : 1;
+  } else {
+    streak = 0;
+  }
+
+  if (streak > longestStreak) longestStreak = streak;
+
+  localStorage.setItem("streak", streak);
+  localStorage.setItem("longestStreak", longestStreak);
+} else {
       if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
       tempStreak = 0;
     }
