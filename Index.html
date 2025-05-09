@@ -141,14 +141,20 @@ function updateStreakFromCalendar() {
   yesterday.setDate(current.getDate() - 1);
   const yesterdayKey = yesterday.toISOString().split("T")[0];
 
-  let yesterdayMetGoal = (taskLog[yesterdayKey] || 0) >= defaultTasks;
-  let todayMetGoal = (taskLog[today] || 0) >= defaultTasks;
+  const yesterdayMetGoal = (taskLog[yesterdayKey] || 0) >= defaultTasks;
+  const todayMetGoal = (taskLog[today] || 0) >= defaultTasks;
 
   if (todayMetGoal) {
     streak = yesterdayMetGoal ? streak + 1 : 1;
   } else {
     streak = 0;
   }
+
+  if (streak > longestStreak) longestStreak = streak;
+
+  localStorage.setItem("streak", streak);
+  localStorage.setItem("longestStreak", longestStreak);
+}
 
   if (streak > longestStreak) longestStreak = streak;
 
