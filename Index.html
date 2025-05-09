@@ -96,8 +96,6 @@
   <h2>Settings Menu</h2>
   <button onclick="toggleBadgeModal()">Badges</button>
   <button onclick="resetTotalTasks()">Reset Total Tasks</button>
-  <button onclick="toggleBadgeModal()">Badges</button>
-  <button onclick="resetTotalTasks()">Reset Total Tasks</button>
   <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
   <button onclick="resetDay()">Reset Day</button>
   <button onclick="advanceDay(-1)">-1 Day</button>
@@ -154,16 +152,7 @@ function updateStreakFromCalendar() {
 
   localStorage.setItem("streak", streak);
   localStorage.setItem("longestStreak", longestStreak);
-} else {
-      if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-      tempStreak = 0;
-    }
-  }
-  if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-  streak = currentStreak;
-  longestStreak = longestStreakSoFar;
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("longestStreak", longestStreak);
+}
 }
 
 function updateDisplays() {
