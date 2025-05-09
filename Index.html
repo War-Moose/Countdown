@@ -358,13 +358,9 @@ function checkBadges() {
     initializeBadges();
   }
 }
-  });
-  if (updated) {
-    localStorage.setItem("badges", JSON.stringify(badges));
-    initializeBadges();
   }
-} 
-}
+
+initializeBadges();
 
 function initializeBadges() {
   const grid = document.getElementById("badgeGrid");
