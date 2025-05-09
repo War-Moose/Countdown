@@ -352,12 +352,7 @@ function checkBadges() {
       showBadgePopup(badge.name);
       updated = true;
     }
-  });
-  if (updated) {
-    localStorage.setItem("badges", JSON.stringify(badges));
-    initializeBadges();
-  }
-}
+
   });
   if (updated) {
     localStorage.setItem("badges", JSON.stringify(badges));
