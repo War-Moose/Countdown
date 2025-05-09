@@ -150,7 +150,7 @@ function updateStreakFromCalendar() {
 
   if (streak > longestStreak) {
     longestStreak = streak;
-    
+    localStorage.setItem("longestStreak", longestStreak);
   }
 
   localStorage.setItem("streak", streak);
