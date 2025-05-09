@@ -93,9 +93,9 @@
   <div class="calendar" id="calendar"></div>
   <div id="menuOverlay" onclick="toggleMenu(false)"></div>
   <div id="settingsMenu">
+  <h2>Settings Menu</h2>
   <button onclick="toggleBadgeModal()">Badges</button>
   <button onclick="resetTotalTasks()">Reset Total Tasks</button>
-  <h2>Settings Menu</h2>
   <button onclick="toggleBadgeModal()">Badges</button>
   <button onclick="resetTotalTasks()">Reset Total Tasks</button>
   <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
@@ -149,12 +149,6 @@ function updateStreakFromCalendar() {
   } else {
     streak = 0;
   }
-
-  if (streak > longestStreak) longestStreak = streak;
-
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("longestStreak", longestStreak);
-}
 
   if (streak > longestStreak) longestStreak = streak;
 
@@ -346,7 +340,7 @@ function checkBadges() {
         showBadgePopup(badge.name);
         updated = true;
       }
-      if (badge.id === \"badge_streak3\" && streak >= 3) {
+      if (badge.id === "badge_streak3" && streak >= 3) {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
