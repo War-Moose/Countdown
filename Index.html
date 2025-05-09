@@ -77,7 +77,6 @@
 <body>
   <h1>Daily Task Tracker</h1>
   <p class="counter">Date: <span id="currentDate"></span></p>
-  <p class="counter">Goal: 16,436</p>
   <p class="counter">Daily Tasks Left: <span id="tasksLeft"></span></p>
   <p class="counter">Daily Tasks Completed: <span id="tasksDone"></span></p>
   <p class="counter">Total Tasks Completed: <span id="totalTasksDone"></span></p>
@@ -92,12 +91,8 @@
   <button onclick="document.getElementById('importInput').click()">Import Backup</button>
 
   <div class="calendar" id="calendar"></div>
-
   <div id="menuOverlay" onclick="toggleMenu(false)"></div>
   <div id="settingsMenu">
-    <button onclick="resetTotalTasks()">Reset Total Tasks</button>
-    <button onclick="toggleBadgeModal()">Badges</button>
-    <button onclick="resetBadges()">Reset Badges</button>
     <h2>Settings Menu</h2>
     <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
     <button onclick="resetDay()">Reset Day</button>
@@ -105,294 +100,188 @@
     <button onclick="advanceDay(1)">+1 Day</button>
     <button onclick="toggleMenu(false)">Close</button>
   </div>
+  <script>
+    const defaultTasks = 3;
+    let now = new Date();
+    let today = now.toISOString().split("T")[0];
 
-  <div id="badgeModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:20px; border-radius:10px; z-index:2000; max-width:600px; text-align:center;">
-    <h2>Achievements</h2>
-    <div id="badgeGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap:15px; justify-items:center; margin-top: 20px;"></div>
-    <button onclick="toggleBadgeModal(false)">Close</button>
-  </div>
+    let tasksLeft = parseInt(localStorage.getItem("tasksLeft")) || defaultTasks;
+    let tasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
+    let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
+    let streak = parseInt(localStorage.getItem("streak")) || 0;
+    let longestStreak = parseInt(localStorage.getItem("longestStreak")) || 0;
+    const taskLog = JSON.parse(localStorage.getItem("taskLog") || "{}");
+    let savedDate = localStorage.getItem("taskDate");
 
-  <div id="badgePopup" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:15px 30px; border-radius:8px; z-index:3000; box-shadow:0 0 10px #000; font-weight:bold;"></div>
+    if (savedDate !== today) {
+      tasksDone = 0;
+      tasksLeft = defaultTasks;
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("taskDate", today);
+    }
 
-<script>
-const defaultTasks = 3;
-let now = new Date();
-let today = now.toISOString().split("T")[0];
+    function updateStreakFromCalendar() {
+      const current = new Date(today);
+      const year = current.getFullYear();
+      const month = current.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let currentStreak = 0;
+      let longestStreakSoFar = 0;
+      let tempStreak = 0;
 
-let tasksLeft = parseInt(localStorage.getItem("tasksLeft")) || defaultTasks;
-let tasksDone = parseInt(localStorage.getItem("tasksDone")) || 0;
-let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
-let streak = parseInt(localStorage.getItem("streak")) || 0;
-let longestStreak = parseInt(localStorage.getItem("longestStreak")) || 0;
-const taskLog = JSON.parse(localStorage.getItem("taskLog") || "{}");
-let savedDate = localStorage.getItem("taskDate");
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const key = date.toISOString().split("T")[0];
+        const val = taskLog[key] || 0;
 
-let badges = JSON.parse(localStorage.getItem("badges"));
-if (!badges || !Array.isArray(badges) || badges.length !== 3) {
-  badges = [
-    { id: "badge_first", name: "First Task", description: "Complete 1 task", unlocked: false },
-    { id: "badge_five", name: "Five Tasks", description: "Complete 5 total tasks", unlocked: false },
-    { id: "badge_streak3", name: "Streaking", description: "Achieve a 3-day streak", unlocked: false }
-  ];
-  localStorage.setItem("badges", JSON.stringify(badges));
-}
-
-if (savedDate !== today) {
-  tasksDone = 0;
-  tasksLeft = defaultTasks;
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("tasksLeft", tasksLeft);
-  localStorage.setItem("taskDate", today);
-}
-
-function updateStreakFromCalendar() {
-  const current = new Date(today);
-  const year = current.getFullYear();
-  const month = current.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  let currentStreak = 0;
-  let longestStreakSoFar = 0;
-  let tempStreak = 0;
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day);
-    const key = date.toISOString().split("T")[0];
-    const val = taskLog[key] || 0;
-
-    if (val >= defaultTasks) {
-      tempStreak++;
-      if (key === today) currentStreak = tempStreak;
-    } else {
+        if (val >= defaultTasks) {
+          tempStreak++;
+          if (key === today) currentStreak = tempStreak;
+        } else {
+          if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
+          tempStreak = 0;
+        }
+      }
       if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
-      tempStreak = 0;
+      streak = currentStreak;
+      longestStreak = longestStreakSoFar;
+      localStorage.setItem("streak", streak);
+      localStorage.setItem("longestStreak", longestStreak);
     }
-  }
 
-  if (tempStreak > longestStreakSoFar) longestStreakSoFar = tempStreak;
+    function updateDisplays() {
+      updateStreakFromCalendar();
+      document.getElementById("tasksLeft").textContent = tasksLeft;
+      document.getElementById("tasksDone").textContent = tasksDone;
+      document.getElementById("totalTasksDone").textContent = totalTasksDone;
+      document.getElementById("streak").textContent = streak;
+      document.getElementById("longestStreak").textContent = longestStreak;
+      document.getElementById("currentDate").textContent = today;
+      drawCalendar();
+    }
 
-  streak = currentStreak;
-  longestStreak = longestStreakSoFar;
-  localStorage.setItem("streak", streak);
-  localStorage.setItem("longestStreak", longestStreak);
-}
-
-function updateDisplays() {
-  updateStreakFromCalendar();
-  document.getElementById("tasksLeft").textContent = tasksLeft;
-  document.getElementById("tasksDone").textContent = tasksDone;
-  document.getElementById("totalTasksDone").textContent = totalTasksDone;
-  document.getElementById("streak").textContent = streak;
-  document.getElementById("longestStreak").textContent = longestStreak;
-  document.getElementById("currentDate").textContent = today;
-  drawCalendar();
-  initializeBadges();
-}
-
-function completeTask() {
-  if (tasksLeft > 0) tasksLeft--;
-  tasksDone++;
-  totalTasksDone++;
-  taskLog[today] = tasksDone;
-  localStorage.setItem("tasksLeft", tasksLeft);
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("totalTasksDone", totalTasksDone);
-  localStorage.setItem("taskLog", JSON.stringify(taskLog));
-  checkBadges();
-  updateDisplays();
-}
-
-function resetDay() {
-  tasksLeft = defaultTasks;
-  tasksDone = 0;
-  delete taskLog[today];
-  localStorage.setItem("tasksLeft", tasksLeft);
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("taskLog", JSON.stringify(taskLog));
-  updateDisplays();
-}
-
-function advanceDay(offset) {
-  const newDate = new Date(today);
-  newDate.setDate(newDate.getDate() + offset);
-  today = newDate.toISOString().split("T")[0];
-  if (today !== localStorage.getItem("taskDate")) {
-    tasksDone = 0;
-    tasksLeft = defaultTasks;
-    localStorage.setItem("tasksDone", tasksDone);
-    localStorage.setItem("tasksLeft", tasksLeft);
-    localStorage.setItem("taskDate", today);
-  }
-  updateDisplays();
-}
-
-function toggleDarkMode() {
-  const isDark = document.body.classList.toggle("dark");
-  localStorage.setItem("darkMode", isDark ? "true" : "false");
-}
-
-function toggleMenu(show = null) {
-  const menu = document.getElementById("settingsMenu");
-  const overlay = document.getElementById("menuOverlay");
-  const isVisible = menu.style.display === "block";
-  const shouldShow = show === null ? !isVisible : show;
-  menu.style.display = shouldShow ? "block" : "none";
-  overlay.style.display = shouldShow ? "block" : "none";
-}
-
-function drawCalendar() {
-  const cal = document.getElementById("calendar");
-  cal.innerHTML = "";
-  const current = new Date(today);
-  const year = current.getFullYear();
-  const month = current.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day);
-    const key = date.toISOString().split("T")[0];
-    const val = taskLog[key] || 0;
-    const box = document.createElement("div");
-    box.classList.add("day");
-    box.textContent = day;
-
-    if (val === 0) box.classList.add("white");
-    else if (val === 1) box.classList.add("red");
-    else if (val === 2) box.classList.add("blue");
-    else box.classList.add("black");
-
-    cal.appendChild(box);
-  }
-}
-
-function exportTrackerData() {
-  const data = {
-    tasksLeft,
-    tasksDone,
-    totalTasksDone,
-    streak,
-    longestStreak,
-    taskLog,
-    badges,
-    dateExported: new Date().toISOString()
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `task-tracker-${today}.json`;
-  link.click();
-}
-
-document.getElementById("importInput").addEventListener("change", function (event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data.tasksLeft !== undefined) tasksLeft = data.tasksLeft;
-      if (data.tasksDone !== undefined) tasksDone = data.tasksDone;
-      if (data.totalTasksDone !== undefined) totalTasksDone = data.totalTasksDone;
-      if (data.streak !== undefined) streak = data.streak;
-      if (data.longestStreak !== undefined) longestStreak = data.longestStreak;
-      if (data.taskLog) localStorage.setItem("taskLog", JSON.stringify(data.taskLog));
-      if (data.badges) localStorage.setItem("badges", JSON.stringify(data.badges));
+    function completeTask() {
+      if (tasksLeft > 0) tasksLeft--;
+      tasksDone++;
+      totalTasksDone++;
+      taskLog[today] = tasksDone;
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("totalTasksDone", totalTasksDone);
+      localStorage.setItem("taskLog", JSON.stringify(taskLog));
       updateDisplays();
-    } catch (err) {
-      alert("Error loading file");
     }
-  };
-  reader.readAsText(file);
-});
 
-document.addEventListener("keydown", e => {
-  if (e.key.toLowerCase() === "d") toggleDarkMode();
-  if (e.key.toLowerCase() === "m") toggleMenu();
-});
+    function resetDay() {
+      tasksLeft = defaultTasks;
+      tasksDone = 0;
+      delete taskLog[today];
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("taskLog", JSON.stringify(taskLog));
+      updateDisplays();
+    }
 
-if (localStorage.getItem("darkMode") === "true") {
-  document.body.classList.add("dark");
-}
-
-function toggleBadgeModal(show = null) {
-  const modal = document.getElementById("badgeModal");
-  const isVisible = modal.style.display === "block";
-  modal.style.display = (show === null ? !isVisible : show) ? "block" : "none";
-}
-
-function resetBadges() {
-  badges.forEach(b => b.unlocked = false);
-  localStorage.setItem("badges", JSON.stringify(badges));
-  initializeBadges();
-  alert("All badges have been reset.");
-}
-
-function showBadgePopup(name) {
-  const popup = document.getElementById("badgePopup");
-  popup.textContent = `🏆 Badge Unlocked: ${name}!`;
-  popup.style.display = "block";
-  setTimeout(() => popup.style.display = "none", 3000);
-}
-
-function checkBadges() {
-  let updated = false;
-  badges.forEach(badge => {
-    if (!badge.unlocked) {
-      if (badge.id === "badge_first" && totalTasksDone === 1) {
-        badge.unlocked = true;
-        showBadgePopup(badge.name);
-        updated = true;
+    function advanceDay(offset) {
+      const newDate = new Date(today);
+      newDate.setDate(newDate.getDate() + offset);
+      today = newDate.toISOString().split("T")[0];
+      if (today !== localStorage.getItem("taskDate")) {
+        tasksDone = 0;
+        tasksLeft = defaultTasks;
+        localStorage.setItem("tasksDone", tasksDone);
+        localStorage.setItem("tasksLeft", tasksLeft);
+        localStorage.setItem("taskDate", today);
       }
-      if (badge.id === "badge_five" && totalTasksDone === 5) {
-        badge.unlocked = true;
-        showBadgePopup(badge.name);
-        updated = true;
-      }
-      if (badge.id === "badge_streak3" && streak === 3) {
-        badge.unlocked = true;
-        showBadgePopup(badge.name);
-        updated = true;
+      updateDisplays();
+    }
+
+    function drawCalendar() {
+      const cal = document.getElementById("calendar");
+      cal.innerHTML = "";
+      const current = new Date(today);
+      const year = current.getFullYear();
+      const month = current.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const key = date.toISOString().split("T")[0];
+        const val = taskLog[key] || 0;
+        const box = document.createElement("div");
+        box.classList.add("day");
+        box.textContent = day;
+        if (val === 0) box.classList.add("white");
+        else if (val === 1) box.classList.add("red");
+        else if (val === 2) box.classList.add("blue");
+        else box.classList.add("black");
+        cal.appendChild(box);
       }
     }
-  });
-  if (updated) {
-    localStorage.setItem("badges", JSON.stringify(badges));
-    initializeBadges();
-  }
-}
 
-
-function initializeBadges() {
-  const grid = document.getElementById("badgeGrid");
-  if (!grid) return;
-  grid.innerHTML = "";
-  badges.forEach(badge => {
-    const div = document.createElement("div");
-    div.style.opacity = badge.unlocked ? "1" : "0.3";
-    div.style.cursor = "pointer";
-    div.innerHTML = `<div style='font-size:2em;'>🏅</div><div style='font-size:0.8em;'>${badge.name}</div>`;
-    div.onclick = () => {
-      alert(badge.unlocked ? badge.description : `Locked: ${badge.description}`);
-    };
-    grid.appendChild(div);
-  });
-}
-
-updateDisplays();
-function resetTotalTasks() {
-  totalTasksDone = 0;
-  localStorage.setItem("totalTasksDone", totalTasksDone);
-  badges.forEach(b => {
-    if (b.id === "badge_first" || b.id === "badge_five") {
-      b.unlocked = false;
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "true" : "false");
     }
-  });
-  localStorage.setItem("badges", JSON.stringify(badges));
-  initializeBadges();
-  updateDisplays();
-  alert("Total Tasks Completed and related badges have been reset.");
-}
 
+    function toggleMenu(show = null) {
+      const menu = document.getElementById("settingsMenu");
+      const overlay = document.getElementById("menuOverlay");
+      const isVisible = menu.style.display === "block";
+      const shouldShow = show === null ? !isVisible : show;
+      menu.style.display = shouldShow ? "block" : "none";
+      overlay.style.display = shouldShow ? "block" : "none";
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key.toLowerCase() === "d") toggleDarkMode();
+      if (e.key.toLowerCase() === "m") toggleMenu();
+    });
+
+    if (localStorage.getItem("darkMode") === "true") {
+      document.body.classList.add("dark");
+    }
+
+    function exportTrackerData() {
+      const data = {
+        tasksLeft,
+        tasksDone,
+        totalTasksDone,
+        streak,
+        longestStreak,
+        taskLog,
+        dateExported: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `task-tracker-${today}.json`;
+      link.click();
+    }
+
+    document.getElementById("importInput").addEventListener("change", function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.tasksLeft !== undefined) tasksLeft = data.tasksLeft;
+          if (data.tasksDone !== undefined) tasksDone = data.tasksDone;
+          if (data.totalTasksDone !== undefined) totalTasksDone = data.totalTasksDone;
+          if (data.streak !== undefined) streak = data.streak;
+          if (data.longestStreak !== undefined) longestStreak = data.longestStreak;
+          if (data.taskLog) localStorage.setItem("taskLog", JSON.stringify(data.taskLog));
+          updateDisplays();
+        } catch (err) {
+          alert("Error loading file");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    updateDisplays();
+  </script>
 </body>
 </html>
