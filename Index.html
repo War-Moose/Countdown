@@ -338,17 +338,15 @@ function checkBadges() {
   let updated = false;
   badges.forEach(badge => {
     if (!badge.unlocked) {
-      if (badge.id === "badge_first" && totalTasksDone === 1) {
+      if (badge.id === "badge_first" && totalTasksDone >= 1) {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
-      }
-      if (badge.id === "badge_five" && totalTasksDone === 5) {
+      } else if (badge.id === "badge_five" && totalTasksDone >= 5) {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
-      }
-      if (badge.id === "badge_streak3" && streak === 3) {
+      } else if (badge.id === "badge_streak3" && streak >= 3) {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
