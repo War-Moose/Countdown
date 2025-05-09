@@ -293,7 +293,33 @@
     }
 
     updateDisplays();
-  </script>
+  const badges = [
+  { id: "badge_first", name: "Daily Dabber", description: "Complete your first full day", unlocked: false },
+  { id: "badge_week", name: "One-Week Wonder", description: "7-day streak", unlocked: false },
+  { id: "badge_year", name: "Yearling", description: "Use the tracker for 365 days", unlocked: false },
+];
+
+function initializeBadges() {
+  const grid = document.getElementById("badgeGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  badges.forEach(badge => {
+    const div = document.createElement("div");
+    div.style.opacity = badge.unlocked ? "1" : "0.3";
+    div.style.cursor = "pointer";
+    div.innerHTML = `<div style='font-size:2em;'>🏅</div><div style='font-size:0.8em;'>${badge.name}</div>`;
+    div.onclick = () => {
+      alert(badge.unlocked ? badge.description : `Locked: ${badge.description}`);
+    };
+    grid.appendChild(div);
+  });
+}
+
+function toggleBadgeModal(show = null) {
+  const modal = document.getElementById("badgeModal");
+  const isVisible = modal.style.display === "block";
+  modal.style.display = (show === null ? !isVisible : show) ? "block" : "none";
+}
 <!-- Badge Modal -->
 <div id="badgeModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:20px; border-radius:10px; z-index:2000; max-width:600px; text-align:center;">
   <h2>Achievements</h2>
