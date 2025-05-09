@@ -126,11 +126,9 @@ let badges = JSON.parse(localStorage.getItem("badges")) || [
 ];
 
 if (savedDate !== today) {
-  tasksDone = 0;
-  tasksLeft = defaultTasks;
-  localStorage.setItem("tasksDone", tasksDone);
-  localStorage.setItem("tasksLeft", tasksLeft);
+  savedDate = today;
   localStorage.setItem("taskDate", today);
+}
 }
 
 function updateStreakFromCalendar() {
