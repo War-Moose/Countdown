@@ -38,16 +38,30 @@
       padding:15px 30px; border-radius:8px; z-index:3000;
       box-shadow:0 0 10px #000; font-weight:bold;
     }
+
+    /* Glow animation for streak */
+    @keyframes streakPop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+    .streak-boost {
+      animation: streakPop 0.8s ease-in-out;
+      color: orange;
+      text-shadow: 0 0 8px orange, 0 0 12px black;
+    }
   </style>
+  <!-- confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <h1>Daily Task Tracker v1.1</h1>
-  <p class="counter">Date: <span id="currentDate"></span></p>
-  <p class="counter">Daily Tasks Left: <span id="tasksLeft"></span></p>
-  <p class="counter">Daily Tasks Completed: <span id="tasksDone"></span></p>
-  <p class="counter">Total Tasks Completed: <span id="totalTasksDone"></span></p>
-  <p class="counter">Current Streak: <span id="streak"></span> days</p>
-  <p class="counter">Longest Streak: <span id="longestStreak"></span> days</p>
+  <p class="counter">Date:                 <span id="currentDate"></span></p>
+  <p class="counter">Daily Tasks Left:     <span id="tasksLeft"></span></p>
+  <p class="counter">Daily Tasks Completed:<span id="tasksDone"></span></p>
+  <p class="counter">Total Tasks Completed:<span id="totalTasksDone"></span></p>
+  <p class="counter">Current Streak:       <span id="streak"></span> days</p>
+  <p class="counter">Longest Streak:       <span id="longestStreak"></span> days</p>
 
   <button onclick="completeTask()">Complete Task</button>
   <button onclick="resetDay()">Reset Day</button>
@@ -104,30 +118,24 @@
     let badges = JSON.parse(localStorage.getItem("badges"));
     if (!Array.isArray(badges) || badges.length !== 3) {
       badges = [
-        { id: "badge_first",    name: "First Task",   description: "Complete 1 task",         unlocked:false },
-        { id: "badge_five",     name: "Five Tasks",   description: "Complete 5 total tasks",  unlocked:false },
-        { id: "badge_streak3",  name: "3-Day Streak", description: "Achieve a 3-day streak",  unlocked:false }
+        { id:"badge_first",   name:"First Task",   description:"Complete 1 task",       unlocked:false },
+        { id:"badge_five",    name:"Five Tasks",   description:"Complete 5 total tasks",unlocked:false },
+        { id:"badge_streak3", name:"3-Day Streak", description:"Achieve a 3-day streak",unlocked:false }
       ];
       localStorage.setItem("badges", JSON.stringify(badges));
     }
 
-    // ——— New full-history longest streak calculator ———
+    // ——— Current streak & full-history longest streak logic ———
     function calculateLongestStreak() {
-      // gather all dates where goal was met
       const doneDates = Object.keys(taskLog)
         .filter(d => taskLog[d] >= defaultTasks)
-        .sort(); // ISO strings sort chronologically
-
+        .sort();
       let maxStreak = 0, tempStreak = 0, prev = null;
       for (const iso of doneDates) {
         if (prev) {
           const pd = new Date(prev), cd = new Date(iso);
-          const diff = Math.round((cd - pd) / (1000*60*60*24));
-          if (diff === 1) {
-            tempStreak++;
-          } else {
-            tempStreak = 1;
-          }
+          const diff = Math.round((cd - pd)/(1000*60*60*24));
+          tempStreak = (diff === 1 ? tempStreak + 1 : 1);
         } else {
           tempStreak = 1;
         }
@@ -136,26 +144,21 @@
       }
       return maxStreak;
     }
-    // ——————————————————————————————————————————————
 
-    // ——— Current streak logic unchanged ———
     function updateStreakFromCalendar() {
-      const y = new Date(today);
-      y.setDate(y.getDate() - 1);
-      const yKey      = y.toISOString().split("T")[0];
-      const prevDone  = (taskLog[yKey] || 0) >= defaultTasks;
+      const y = new Date(today); y.setDate(y.getDate() - 1);
+      const prevDone  = (taskLog[y.toISOString().split("T")[0]] || 0) >= defaultTasks;
       const todayDone = (taskLog[today] || 0) >= defaultTasks;
 
       if (!prevDone) streak = 0;
-      if (todayDone)  streak++;
+      if (todayDone) streak++;
 
-      // now recalc longestStreak using full history
       longestStreak = calculateLongestStreak();
 
       localStorage.setItem("streak", streak);
       localStorage.setItem("longestStreak", longestStreak);
     }
-    // —————————————————————————————————————————————————
+    // ——————————————————————————————————————————————————————
 
     function checkBadges() {
       let updated = false;
@@ -176,8 +179,7 @@
         const div = document.createElement("div");
         div.style.opacity = b.unlocked ? "1" : "0.3";
         div.style.cursor  = "pointer";
-        div.innerHTML     = `<div style='font-size:2em;'>🏅</div>
-                             <div style='font-size:0.8em;'>${b.name}</div>`;
+        div.innerHTML     = `<div style='font-size:2em;'>🏅</div><div style='font-size:0.8em;'>${b.name}</div>`;
         div.onclick       = () => alert(b.unlocked ? b.description : `Locked: ${b.description}`);
         grid.appendChild(div);
       });
@@ -200,11 +202,29 @@
       if (tasksLeft>0) tasksLeft--;
       tasksDone++; totalTasksDone++;
       taskLog[today] = tasksDone;
-      localStorage.setItem("tasksLeft",tasksLeft);
-      localStorage.setItem("tasksDone",tasksDone);
-      localStorage.setItem("totalTasksDone",totalTasksDone);
-      localStorage.setItem("taskLog",JSON.stringify(taskLog));
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("totalTasksDone", totalTasksDone);
+      localStorage.setItem("taskLog", JSON.stringify(taskLog));
+
+      const prevStreak = streak;
       updateDisplays();
+
+      // glow animation on streak increment
+      if (streak > prevStreak) {
+        const el = document.getElementById("streak");
+        el.classList.add("streak-boost");
+        setTimeout(() => el.classList.remove("streak-boost"), 800);
+      }
+      // black & orange confetti when daily goal completed
+      if (tasksDone >= defaultTasks) {
+        confetti({
+          particleCount: 100,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#000000','orange']
+        });
+      }
     }
 
     function resetDay() {
@@ -224,6 +244,7 @@
       updateDisplays();
       alert("Total tasks and relevant badges reset.");
     }
+
     function resetBadges() {
       badges.forEach(b=>b.unlocked=false);
       localStorage.setItem("badges",JSON.stringify(badges));
@@ -234,7 +255,7 @@
       const d=new Date(today);
       d.setDate(d.getDate()+offset);
       today=d.toISOString().split("T")[0];
-      if(today!==localStorage.getItem("taskDate")) {
+      if (today!==localStorage.getItem("taskDate")) {
         tasksDone=0; tasksLeft=defaultTasks;
         localStorage.setItem("tasksDone",tasksDone);
         localStorage.setItem("tasksLeft",tasksLeft);
@@ -253,14 +274,13 @@
         const v=taskLog[key]||0;
         const box=document.createElement("div");
         box.className="day "+(v===0?"white":v===1?"red":v===2?"blue":"black");
-        box.textContent=d;
-        cal.appendChild(box);
+        box.textContent=d; cal.appendChild(box);
       }
     }
 
     function exportTrackerData() {
-      const data={ tasksLeft,tasksDone,totalTasksDone,streak,longestStreak,taskLog,badges };
-      const blob=new Blob([JSON.stringify(data,null,2)],{ type:"application/json" });
+      const data={tasksLeft,tasksDone,totalTasksDone,streak,longestStreak,taskLog,badges};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob),a=document.createElement("a");
       a.href=url; a.download=`backup-${today}.json`;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -270,7 +290,7 @@
       const file=evt.target.files[0];
       if(!file) return;
       const reader=new FileReader();
-      reader.onload=e=>{
+      reader.onload=e=>{ 
         const data=JSON.parse(e.target.result);
         tasksLeft      = data.tasksLeft      || tasksLeft;
         tasksDone      = data.tasksDone      || tasksDone;
@@ -294,9 +314,9 @@
 
     function showBadgePopup(name) {
       const p=document.getElementById("badgePopup");
-      p.textContent=`🏆 Badge Unlocked: ${name}!`;
+      p.textContent = `🏆 Badge Unlocked: ${name}!`;
       p.style.display="block";
-      setTimeout(()=>p.style.display="none",3000);
+      setTimeout(() => p.style.display="none",3000);
     }
 
     function toggleDarkMode() {
