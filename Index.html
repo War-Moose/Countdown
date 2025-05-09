@@ -336,25 +336,28 @@ function showBadgePopup(name) {
 
 function checkBadges() {
   let updated = false;
-  let previousBadges = JSON.parse(localStorage.getItem("badges")) || [];
   badges.forEach(badge => {
     if (!badge.unlocked) {
-      if (badge.id === "badge_first" && totalTasksDone >= 1 && !previousBadges.find(b => b.id === badge.id)?.unlocked) {
+      if (badge.id === "badge_first" && totalTasksDone >= 1) {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
-      }
-      if (badge.id === "badge_five" && totalTasksDone >= 5 && !previousBadges.find(b => b.id === badge.id)?.unlocked) {
+      } else if (badge.id === "badge_five" && totalTasksDone >= 5) {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
-      }
-      if (badge.id === "badge_streak3" && streak >= 3 && !previousBadges.find(b => b.id === badge.id)?.unlocked) {
+      } else if (badge.id === "badge_streak3" && streak >= 3) {
         badge.unlocked = true;
         showBadgePopup(badge.name);
         updated = true;
       }
     }
+  });
+  if (updated) {
+    localStorage.setItem("badges", JSON.stringify(badges));
+    initializeBadges();
+  }
+}
   });
   if (updated) {
     localStorage.setItem("badges", JSON.stringify(badges));
