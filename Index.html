@@ -254,7 +254,8 @@
         streak,
         longestStreak,
         taskLog,
-        dateExported: new Date().toISOString()
+        dateExported: new Date().toISOString(),
+        badges
       };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -277,6 +278,7 @@
           if (data.streak !== undefined) streak = data.streak;
           if (data.longestStreak !== undefined) longestStreak = data.longestStreak;
           if (data.taskLog) localStorage.setItem("taskLog", JSON.stringify(data.taskLog));
+          if (data.badges) localStorage.setItem("badges", JSON.stringify(data.badges));
           updateDisplays();
         } catch (err) {
           alert("Error loading file");
