@@ -94,7 +94,8 @@
   <div class="calendar" id="calendar"></div>
 
   <div id="menuOverlay" onclick="toggleMenu(false)"></div>
-  <div id="settingsMenu">
+  $1
+    <button onclick="resetBadges()">Reset Badges</button>
     <button onclick="toggleBadgeModal()">Badges</button>
     <h2>Settings Menu</h2>
     <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
@@ -294,13 +295,14 @@
     }
 
     updateDisplays();
-  const badges = [
+  const badges = JSON.parse(localStorage.getItem("badges")) || [
   { id: "badge_first", name: "First Task", description: "Complete 1 task", unlocked: false },
   { id: "badge_five", name: "Five Tasks", description: "Complete 5 total tasks", unlocked: false },
   { id: "badge_streak3", name: "Streaking", description: "Achieve a 3-day streak", unlocked: false }
 ];
 
 function initializeBadges() {
+  localStorage.setItem("badges", JSON.stringify(badges));
   const grid = document.getElementById("badgeGrid");
   if (!grid) return;
   grid.innerHTML = "";
@@ -343,7 +345,13 @@ function checkBadges() {
   });
   initializeBadges();
 }
-</script>
+function resetBadges() {
+  badges.forEach(b => b.unlocked = false);
+  localStorage.setItem("badges", JSON.stringify(badges));
+  initializeBadges();
+  alert("All badges have been reset.");
+}
+$1
 <!-- Badge Modal -->
 <div id="badgeModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:20px; border-radius:10px; z-index:2000; max-width:600px; text-align:center;">
   <h2>Achievements</h2>
