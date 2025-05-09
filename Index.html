@@ -176,6 +176,8 @@ function completeTask() {
   localStorage.setItem("totalTasksDone", totalTasksDone);
   localStorage.setItem("taskLog", JSON.stringify(taskLog));
   checkBadges();
+  updateStreakFromCalendar();
+  checkBadges();
   updateDisplays();
 }
 
