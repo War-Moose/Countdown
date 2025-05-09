@@ -95,6 +95,7 @@
 
   <div id="menuOverlay" onclick="toggleMenu(false)"></div>
   <div id="settingsMenu">
+    <button onclick="toggleBadgeModal()">Badges</button>
     <h2>Settings Menu</h2>
     <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
     <button onclick="resetDay()">Reset Day</button>
@@ -177,6 +178,7 @@
       localStorage.setItem("totalTasksDone", totalTasksDone);
       localStorage.setItem("taskLog", JSON.stringify(taskLog));
       updateDisplays();
+    initializeBadges();
     }
 
     function resetDay() {
@@ -292,5 +294,15 @@
 
     updateDisplays();
   </script>
+<!-- Badge Modal -->
+<div id="badgeModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:20px; border-radius:10px; z-index:2000; max-width:600px; text-align:center;">
+  <h2>Achievements</h2>
+  <div id="badgeGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap:15px; justify-items:center; margin-top: 20px;"></div>
+  <button onclick="toggleBadgeModal(false)">Close</button>
+</div>
+
+<!-- Badge Popup -->
+<div id="badgePopup" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:15px 30px; border-radius:8px; z-index:3000; box-shadow:0 0 10px #000; font-weight:bold;"></div>
+
 </body>
 </html>
