@@ -197,7 +197,8 @@ function completeTask() {
   localStorage.setItem("tasksDone", tasksDone);
   localStorage.setItem("totalTasksDone", totalTasksDone);
   localStorage.setItem("taskLog", JSON.stringify(taskLog));
-  updateDisplays();
+  initializeBadges();
+updateDisplays();
   checkBadges();
 }
 
@@ -358,9 +359,7 @@ function checkBadges() {
     initializeBadges();
   }
 }
-  }
 
-initializeBadges();
 
 function initializeBadges() {
   const grid = document.getElementById("badgeGrid");
