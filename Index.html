@@ -126,11 +126,15 @@ let longestStreak = parseInt(localStorage.getItem("longestStreak")) || 0;
 const taskLog = JSON.parse(localStorage.getItem("taskLog") || "{}");
 let savedDate = localStorage.getItem("taskDate");
 
-const badges = JSON.parse(localStorage.getItem("badges")) || [
-  { id: "badge_first", name: "First Task", description: "Complete 1 task", unlocked: false },
-  { id: "badge_five", name: "Five Tasks", description: "Complete 5 total tasks", unlocked: false },
-  { id: "badge_streak3", name: "Streaking", description: "Achieve a 3-day streak", unlocked: false }
-];
+let badges = JSON.parse(localStorage.getItem("badges"));
+if (!badges || !Array.isArray(badges) || badges.length !== 3) {
+  badges = [
+    { id: "badge_first", name: "First Task", description: "Complete 1 task", unlocked: false },
+    { id: "badge_five", name: "Five Tasks", description: "Complete 5 total tasks", unlocked: false },
+    { id: "badge_streak3", name: "Streaking", description: "Achieve a 3-day streak", unlocked: false }
+  ];
+  localStorage.setItem("badges", JSON.stringify(badges));
+}
 
 if (savedDate !== today) {
   tasksDone = 0;
