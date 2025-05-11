@@ -113,9 +113,10 @@
   <!-- Analytics modal -->
   <div id="analyticsOverlay" onclick="toggleAnalytics(false)"></div>
   <div id="analyticsModal" class="analytics-modal">
-    <h2>Weekly &amp; Monthly Analytics</h2>
+    <h2>Weekly, Monthly &amp; Year Analytics</h2>
     <div class="chart-container"><canvas id="weeklyChart"></canvas></div>
     <div class="chart-container"><canvas id="monthlyChart"></canvas></div>
+    <div class="chart-container"><canvas id="yearChart"></canvas></div>
     <button onclick="toggleAnalytics(false)">Close</button>
   </div>
 
@@ -126,86 +127,85 @@
     // Helper: safe parse/format
     // ————————————————
     function parseDate(str) {
-      const [y,m,d] = str.split('-').map(Number);
-      return new Date(y, m-1, d);
+      const [y,m,d]=str.split('-').map(Number);
+      return new Date(y,m-1,d);
     }
     function formatDate(dt) {
-      const y = dt.getFullYear();
-      const m = String(dt.getMonth()+1).padStart(2,'0');
-      const d = String(dt.getDate()).padStart(2,'0');
+      const y=dt.getFullYear();
+      const m=String(dt.getMonth()+1).padStart(2,'0');
+      const d=String(dt.getDate()).padStart(2,'0');
       return `${y}-${m}-${d}`;
     }
 
     // ——— CORE STATE & STORAGE ———
-    const defaultTasks = 3;
-    let today = (new Date()).toISOString().split("T")[0];
-    let tasksLeft      = parseInt(localStorage.getItem("tasksLeft"))      || defaultTasks;
-    let tasksDone      = parseInt(localStorage.getItem("tasksDone"))      || 0;
-    let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
-    let streak         = parseInt(localStorage.getItem("streak"))         || 0;
-    let longestStreak  = parseInt(localStorage.getItem("longestStreak"))  || 0;
-    const taskLog      = JSON.parse(localStorage.getItem("taskLog")   || "{}");
-    let savedDate      = localStorage.getItem("taskDate");
-
-    if (savedDate !== today) {
-      tasksDone = 0; tasksLeft = defaultTasks;
-      localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("tasksLeft", tasksLeft);
-      localStorage.setItem("taskDate", today);
+    const defaultTasks=3;
+    let today=new Date().toISOString().split("T")[0];
+    let tasksLeft      =parseInt(localStorage.getItem("tasksLeft"))      ||defaultTasks;
+    let tasksDone      =parseInt(localStorage.getItem("tasksDone"))      ||0;
+    let totalTasksDone =parseInt(localStorage.getItem("totalTasksDone")) ||0;
+    let streak         =parseInt(localStorage.getItem("streak"))         ||0;
+    let longestStreak  =parseInt(localStorage.getItem("longestStreak"))  ||0;
+    const taskLog     =JSON.parse(localStorage.getItem("taskLog")||"{}");
+    let savedDate     =localStorage.getItem("taskDate");
+    if(savedDate!==today){
+      tasksDone=0; tasksLeft=defaultTasks;
+      localStorage.setItem("tasksDone",tasksDone);
+      localStorage.setItem("tasksLeft",tasksLeft);
+      localStorage.setItem("taskDate",today);
     }
 
     // ——— BADGES INIT ———
-    let badges = JSON.parse(localStorage.getItem("badges"));
-    if (!Array.isArray(badges) || badges.length !== 3) {
-      badges = [
-        { id:"badge_first",   name:"First Task",   description:"Complete 1 task",        unlocked:false },
-        { id:"badge_five",    name:"Five Tasks",   description:"Complete 5 total tasks", unlocked:false },
-        { id:"badge_streak3", name:"3-Day Streak", description:"Achieve a 3-day streak", unlocked:false }
+    let badges=JSON.parse(localStorage.getItem("badges"));
+    if(!Array.isArray(badges)||badges.length!==3){
+      badges=[
+        {id:"badge_first",name:"First Task",description:"Complete 1 task",unlocked:false},
+        {id:"badge_five", name:"Five Tasks",description:"Complete 5 total tasks",unlocked:false},
+        {id:"badge_streak3",name:"3-Day Streak",description:"Achieve a 3-day streak",unlocked:false}
       ];
-      localStorage.setItem("badges", JSON.stringify(badges));
+      localStorage.setItem("badges",JSON.stringify(badges));
     }
 
     // ——— STREAK CALCULATIONS ———
-    function calculateLongestStreak() {
-      const doneDates = Object.keys(taskLog).filter(d=>taskLog[d]>=defaultTasks).sort();
-      let maxS=0, temp=0, prev=null;
+    function calculateLongestStreak(){
+      const doneDates=Object.keys(taskLog).filter(d=>taskLog[d]>=defaultTasks).sort();
+      let maxS=0,temp=0,prev=null;
       doneDates.forEach(iso=>{
-        if (prev) {
-          const diff = Math.round((new Date(iso)-new Date(prev))/86400000);
-          temp = (diff===1? temp+1 : 1);
+        if(prev){
+          const diff=Math.round((new Date(iso)-new Date(prev))/86400000);
+          temp=(diff===1?temp+1:1);
         } else temp=1;
-        maxS = Math.max(maxS, temp);
-        prev = iso;
+        maxS=Math.max(maxS,temp);
+        prev=iso;
       });
       return maxS;
     }
-    function updateStreakFromCalendar() {
-      const y = parseDate(today);
+    function updateStreakFromCalendar(){
+      const y=parseDate(today);
       y.setDate(y.getDate()-1);
-      const prevKey  = formatDate(y);
-      const prevDone = (taskLog[prevKey]||0) >= defaultTasks;
-      const todayDone= (taskLog[today]  ||0) >= defaultTasks;
-      if (!prevDone) streak=0;
-      if (todayDone) streak++;
-      longestStreak = calculateLongestStreak();
-      localStorage.setItem("streak", streak);
-      localStorage.setItem("longestStreak", longestStreak);
+      const prevKey=formatDate(y);
+      const prevDone=(taskLog[prevKey]||0)>=defaultTasks;
+      const todayDone=(taskLog[today]||0)>=defaultTasks;
+      if(!prevDone) streak=0;
+      if(todayDone) streak++;
+      longestStreak=calculateLongestStreak();
+      localStorage.setItem("streak",streak);
+      localStorage.setItem("longestStreak",longestStreak);
     }
 
     // ——— BADGE LOGIC ———
     function checkBadges(){
-      let updated = false;
+      let updated=false;
       badges.forEach(b=>{
-        if (!b.unlocked) {
-          if (b.id==="badge_first" && totalTasksDone>=1) { b.unlocked=true; showBadgePopup(b.name); updated=true; }
-          else if(b.id==="badge_five" && totalTasksDone>=5){ b.unlocked=true; showBadgePopup(b.name); updated=true; }
-          else if(b.id==="badge_streak3"&& streak>=3)      { b.unlocked=true; showBadgePopup(b.name); updated=true; }
+        if(!b.unlocked){
+          if(b.id==="badge_first"    && totalTasksDone>=1) {b.unlocked=true;showBadgePopup(b.name);updated=true;}
+          else if(b.id==="badge_five" && totalTasksDone>=5) {b.unlocked=true;showBadgePopup(b.name);updated=true;}
+          else if(b.id==="badge_streak3"&&streak>=3)        {b.unlocked=true;showBadgePopup(b.name);updated=true;}
         }
       });
-      if(updated) localStorage.setItem("badges", JSON.stringify(badges));
+      if(updated) localStorage.setItem("badges",JSON.stringify(badges));
     }
-    function initializeBadges() {
-      const grid = document.getElementById("badgeGrid");
+    function initializeBadges(){
+      const grid=document.getElementById("badgeGrid");
       grid.innerHTML="";
       badges.forEach(b=>{
         const div=document.createElement("div");
@@ -217,96 +217,87 @@
       });
     }
 
-    // ——— DRAW CALENDAR (aligned) ———
-    function drawCalendar() {
-      const cal = document.getElementById("calendar");
-      cal.innerHTML = "";
-      const ref = parseDate(today);
-      const Y = ref.getFullYear(), M = ref.getMonth();
-      // weekday of 1st (0=Sun..6=Sat)
-      const firstDay = new Date(Y, M, 1).getDay();
-      // blank slots
-      for(let i=0;i<firstDay;i++){
-        const empty = document.createElement("div");
-        empty.className="day";
-        empty.style.visibility="hidden";
+    // ——— DRAW CALENDAR (Sunday-first) ———
+    function drawCalendar(){
+      const cal=document.getElementById("calendar");
+      cal.innerHTML="";
+      const ref=parseDate(today),Y=ref.getFullYear(),M=ref.getMonth();
+      const firstDay=new Date(Y,M,1).getDay(); // 0=Sun..6=Sat
+      for(let i=0;i<firstDay;i++){ 
+        const empty=document.createElement("div");
+        empty.className="day"; empty.style.visibility="hidden";
         cal.appendChild(empty);
       }
-      const daysInMonth = new Date(Y, M+1, 0).getDate();
-      for(let d=1; d<=daysInMonth; d++){
-        const dt = new Date(Y, M, d);
-        const key = formatDate(dt);
-        const val = taskLog[key]||0;
-        const box = document.createElement("div");
-        box.className = "day " + (val===0?"white":val===1?"red":val===2?"blue":"black");
-        box.textContent = d;
+      const daysInMonth=new Date(Y,M+1,0).getDate();
+      for(let d=1;d<=daysInMonth;d++){
+        const key=formatDate(new Date(Y,M,d)),v=taskLog[key]||0;
+        const box=document.createElement("div");
+        box.className="day "+(v===0?"white":v===1?"red":v===2?"blue":"black");
+        box.textContent=d;
         cal.appendChild(box);
       }
     }
 
     // ——— TITLE BADGES ———
     function updateTitleBadges(){
-      const leftId  = localStorage.getItem("titleBadgeLeft"),
-            rightId = localStorage.getItem("titleBadgeRight"),
-            map     = Object.fromEntries(badges.map(b=>[b.id,b])),
-            leftEl  = document.getElementById("badgeLeft"),
-            rightEl = document.getElementById("badgeRight");
-      if(map[leftId]){ leftEl.textContent="🏅"; leftEl.title=map[leftId].name; } else leftEl.textContent="";
-      if(map[rightId]){rightEl.textContent="🏅"; rightEl.title=map[rightId].name;} else rightEl.textContent="";
+      const leftId=localStorage.getItem("titleBadgeLeft"),
+            rightId=localStorage.getItem("titleBadgeRight"),
+            map=Object.fromEntries(badges.map(b=>[b.id,b])),
+            leftEl=document.getElementById("badgeLeft"),
+            rightEl=document.getElementById("badgeRight");
+      if(map[leftId]){ leftEl.textContent="🏅";leftEl.title=map[leftId].name;}else leftEl.textContent="";
+      if(map[rightId]){rightEl.textContent="🏅";rightEl.title=map[rightId].name;}else rightEl.textContent="";
     }
     function initTitleBadgeSelectors(){
       const selL=document.getElementById("selectLeftBadge"),
             selR=document.getElementById("selectRightBadge");
       badges.forEach(b=>{
         const o1=document.createElement("option");
-        o1.value=b.id; o1.textContent=b.name; selL.appendChild(o1);
-        const o2=o1.cloneNode(true); selR.appendChild(o2);
+        o1.value=b.id;o1.textContent=b.name;selL.appendChild(o1);
+        const o2=o1.cloneNode(true);selR.appendChild(o2);
       });
-      selL.value = localStorage.getItem("titleBadgeLeft") || badges[0].id;
-      selR.value = localStorage.getItem("titleBadgeRight")|| badges[1].id;
-      selL.onchange = e => { localStorage.setItem("titleBadgeLeft", e.target.value); updateTitleBadges(); };
-      selR.onchange = e => { localStorage.setItem("titleBadgeRight",e.target.value); updateTitleBadges(); };
+      selL.value=localStorage.getItem("titleBadgeLeft")||badges[0].id;
+      selR.value=localStorage.getItem("titleBadgeRight")||badges[1].id;
+      selL.onchange=e=>{localStorage.setItem("titleBadgeLeft",e.target.value);updateTitleBadges()};
+      selR.onchange=e=>{localStorage.setItem("titleBadgeRight",e.target.value);updateTitleBadges()};
     }
 
-    // ——— UPDATE ALL DISPLAYS ———
+    // ——— UPDATE UI ———
     function updateDisplays(){
-      document.getElementById("currentDate").textContent     = today;
-      document.getElementById("tasksLeft").textContent      = tasksLeft;
-      document.getElementById("tasksDone").textContent      = tasksDone;
-      document.getElementById("totalTasksDone").textContent = totalTasksDone;
+      document.getElementById("currentDate").textContent=today;
+      document.getElementById("tasksLeft").textContent=tasksLeft;
+      document.getElementById("tasksDone").textContent=tasksDone;
+      document.getElementById("totalTasksDone").textContent=totalTasksDone;
       updateStreakFromCalendar();
-      document.getElementById("streak").textContent         = streak;
-      document.getElementById("longestStreak").textContent  = longestStreak;
+      document.getElementById("streak").textContent=streak;
+      document.getElementById("longestStreak").textContent=longestStreak;
       drawCalendar();
       checkBadges();
       initializeBadges();
       updateTitleBadges();
     }
 
-    // ——— TASK HANDLERS & CONFETTI & GLOW ———
+    // ——— TASKS, CONFETTI & GLOW ———
     function completeTask(){
       if(tasksLeft>0) tasksLeft--;
       tasksDone++; totalTasksDone++;
-      taskLog[today] = tasksDone;
-      localStorage.setItem("tasksLeft",      tasksLeft);
-      localStorage.setItem("tasksDone",      tasksDone);
-      localStorage.setItem("totalTasksDone", totalTasksDone);
-      localStorage.setItem("taskLog",        JSON.stringify(taskLog));
-
-      const prevStr=streak, prevLong=longestStreak;
+      taskLog[today]=tasksDone;
+      localStorage.setItem("tasksLeft",tasksLeft);
+      localStorage.setItem("tasksDone",tasksDone);
+      localStorage.setItem("totalTasksDone",totalTasksDone);
+      localStorage.setItem("taskLog",JSON.stringify(taskLog));
+      const prevStr=streak,prevLong=longestStreak;
       updateDisplays();
-
       if(streak>prevStr){
-        const el = document.getElementById("streak");
+        const el=document.getElementById("streak");
         el.classList.add("streak-boost");
         setTimeout(()=>el.classList.remove("streak-boost"),800);
       }
       if(longestStreak>prevLong){
-        const elL= document.getElementById("longestStreak");
+        const elL=document.getElementById("longestStreak");
         elL.classList.add("streak-boost");
         setTimeout(()=>elL.classList.remove("streak-boost"),800);
       }
-
       if(tasksDone>=defaultTasks){
         confetti({particleCount:100,spread:60,origin:{y:0.6},colors:['#000000','#FFA500']});
       }
@@ -314,28 +305,28 @@
     function resetDay(){
       tasksDone=0; tasksLeft=defaultTasks;
       delete taskLog[today];
-      localStorage.setItem("tasksLeft", tasksLeft);
-      localStorage.setItem("tasksDone", tasksDone);
-      localStorage.setItem("taskLog",   JSON.stringify(taskLog));
+      localStorage.setItem("tasksLeft",tasksLeft);
+      localStorage.setItem("tasksDone",tasksDone);
+      localStorage.setItem("taskLog",JSON.stringify(taskLog));
       updateDisplays();
     }
     function resetTotalTasks(){
-      totalTasksDone=0; localStorage.setItem("totalTasksDone",0);
-      badges.forEach(b=>{ if(b.id==="badge_first"||b.id==="badge_five") b.unlocked=false; });
-      localStorage.setItem("badges", JSON.stringify(badges));
-      updateDisplays(); alert("Total tasks and relevant badges reset.");
+      totalTasksDone=0;localStorage.setItem("totalTasksDone",0);
+      badges.forEach(b=>{if(b.id==="badge_first"||b.id==="badge_five")b.unlocked=false;});
+      localStorage.setItem("badges",JSON.stringify(badges));
+      updateDisplays();alert("Total tasks and relevant badges reset.");
     }
     function resetBadges(){
       badges.forEach(b=>b.unlocked=false);
-      localStorage.setItem("badges", JSON.stringify(badges));
+      localStorage.setItem("badges",JSON.stringify(badges));
       initializeBadges();
     }
     function advanceDay(offset){
-      const d = parseDate(today);
+      const d=parseDate(today);
       d.setDate(d.getDate()+offset);
-      today = formatDate(d);
+      today=formatDate(d);
       if(today!==localStorage.getItem("taskDate")){
-        tasksDone=0; tasksLeft=defaultTasks;
+        tasksDone=0;tasksLeft=defaultTasks;
         localStorage.setItem("tasksDone",tasksDone);
         localStorage.setItem("tasksLeft",tasksLeft);
         localStorage.setItem("taskDate",today);
@@ -346,29 +337,29 @@
       const data={tasksLeft,tasksDone,totalTasksDone,streak,longestStreak,taskLog,badges};
       const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob),a=document.createElement("a");
-      a.href=url; a.download=`backup-${today}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      a.href=url;a.download=`backup-${today}.json`;document.body.appendChild(a);a.click();document.body.removeChild(a);
     }
     function importTrackerData(evt){
-      const file=evt.target.files[0]; if(!file)return;
+      const file=evt.target.files[0];if(!file)return;
       const reader=new FileReader();
       reader.onload=e=>{
         const data=JSON.parse(e.target.result);
-        tasksLeft      = data.tasksLeft      || tasksLeft;
-        tasksDone      = data.tasksDone      || tasksDone;
-        totalTasksDone = data.totalTasksDone || totalTasksDone;
-        streak         = data.streak         || streak;
-        longestStreak  = data.longestStreak  || longestStreak;
-        Object.assign(taskLog, data.taskLog);
-        badges = data.badges || badges;
-        localStorage.setItem("tasksLeft",      tasksLeft);
-        localStorage.setItem("tasksDone",      tasksDone);
-        localStorage.setItem("totalTasksDone", totalTasksDone);
-        localStorage.setItem("streak",         streak);
-        localStorage.setItem("longestStreak",  longestStreak);
-        localStorage.setItem("taskLog",        JSON.stringify(taskLog));
-        localStorage.setItem("badges",         JSON.stringify(badges));
-        localStorage.setItem("taskDate",       today);
-        updateDisplays(); alert("✅ Imported successfully");
+        tasksLeft      =data.tasksLeft      ||tasksLeft;
+        tasksDone      =data.tasksDone      ||tasksDone;
+        totalTasksDone =data.totalTasksDone ||totalTasksDone;
+        streak         =data.streak         ||streak;
+        longestStreak  =data.longestStreak  ||longestStreak;
+        Object.assign(taskLog,data.taskLog);
+        badges=data.badges||badges;
+        localStorage.setItem("tasksLeft",tasksLeft);
+        localStorage.setItem("tasksDone",tasksDone);
+        localStorage.setItem("totalTasksDone",totalTasksDone);
+        localStorage.setItem("streak",streak);
+        localStorage.setItem("longestStreak",longestStreak);
+        localStorage.setItem("taskLog",JSON.stringify(taskLog));
+        localStorage.setItem("badges",JSON.stringify(badges));
+        localStorage.setItem("taskDate",today);
+        updateDisplays();alert("✅ Imported successfully");
       };
       reader.readAsText(file);
     }
@@ -379,21 +370,21 @@
       setTimeout(()=>p.style.display="none",3000);
     }
 
-    // ——— TOGGLE FUNCTIONS ———
+    // ——— TOGGLES ———
     function toggleDarkMode(){
       const d=document.body.classList.toggle("dark");
-      localStorage.setItem("darkMode", d);
+      localStorage.setItem("darkMode",d);
     }
     function toggleMenu(show=null){
-      const ov=document.getElementById("menuOverlay"), sm=document.getElementById("settingsMenu"),
-            open= show===null ? (sm.style.display!=="block") : show;
+      const ov=document.getElementById("menuOverlay"),sm=document.getElementById("settingsMenu"),
+            open=show===null?(sm.style.display!=="block"):show;
       ov.style.display=open?"block":"none";
       sm.style.display=open?"block":"none";
     }
     function toggleBadgeModal(show=null){
       const m=document.getElementById("badgeModal"),
-            open=show===null ? (m.style.display!=="block") : show;
-      m.style.display= open?"block":"none";
+            open=show===null?(m.style.display!=="block"):show;
+      m.style.display=open?"block":"none";
     }
 
     // ——— BROWN NOISE ———
@@ -417,12 +408,13 @@
       if(noiseSource){ noiseSource.disconnect(); if(noiseSource.stop) noiseSource.stop(); noiseSource=null; }
     }
     function playTone(duration=0.2){
-      const osc=audioCtx.createOscillator(); osc.type='sine'; osc.frequency.value=440;
-      osc.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime+duration);
+      const osc=audioCtx.createOscillator();
+      osc.type='sine';osc.frequency.value=440;
+      osc.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+duration);
     }
 
     // ——— POMODORO ———
-    let pomInterval=null, pomPhase='work', pomTime=25*60, pomRunning=false;
+    let pomInterval=null,pomPhase='work',pomTime=25*60,pomRunning=false;
     function updatePomTimerDisplay(){
       const m=String(Math.floor(pomTime/60)).padStart(2,'0'),
             s=String(pomTime%60).padStart(2,'0');
@@ -435,11 +427,11 @@
       ring.style.background=`conic-gradient(orange ${pct}%, black ${pct}% 100%)`;
     }
     function tickPom(){
-      pomTime--; updatePomTimerDisplay(); updateProgressRing();
+      pomTime--;updatePomTimerDisplay();updateProgressRing();
       if(pomTime<=0){
         clearInterval(pomInterval);
         if(pomPhase==='work'){
-          stopAllNoise(); playTone(0.5); startBreakPhase();
+          stopAllNoise();playTone(0.5);startBreakPhase();
         } else {
           playTone(0.5);
           pomRunning=false;
@@ -448,14 +440,14 @@
       }
     }
     function startWorkPhase(){
-      pomPhase='work'; pomTime=25*60;
-      updatePomTimerDisplay(); updateProgressRing();
-      playTone(0.2); startBrownNoise();
+      pomPhase='work';pomTime=25*60;
+      updatePomTimerDisplay();updateProgressRing();
+      playTone(0.2);startBrownNoise();
       pomInterval=setInterval(tickPom,1000);
     }
     function startBreakPhase(){
-      pomPhase='break'; pomTime=5*60;
-      updatePomTimerDisplay(); updateProgressRing();
+      pomPhase='break';pomTime=5*60;
+      updatePomTimerDisplay();updateProgressRing();
       playTone(0.2);
       pomInterval=setInterval(tickPom,1000);
     }
@@ -463,43 +455,62 @@
       const modal=document.getElementById('pomodoroModal'),
             ov=document.getElementById('pomodoroOverlay'),
             isVis=modal.style.display==='block',
-            should= show===null ? !isVis : show;
+            should=show===null?!isVis:show;
       modal.style.display=should?'block':'none';
       ov.style.display=should?'block':'none';
-      if(!should && pomRunning){
-        clearInterval(pomInterval); stopAllNoise(); pomRunning=false;
+      if(!should&&pomRunning){
+        clearInterval(pomInterval);stopAllNoise();pomRunning=false;
         document.getElementById('pomStartBtn').textContent='Start Pomodoro';
-        pomPhase='work'; pomTime=25*60;
-        updatePomTimerDisplay(); updateProgressRing();
+        pomPhase='work';pomTime=25*60;
+        updatePomTimerDisplay();updateProgressRing();
       }
     }
 
     // ——— ANALYTICS ———
-    let weeklyChart, monthlyChart;
+    let weeklyChart,monthlyChart,yearChart;
     function renderAnalytics(){
-      // Weekly: Saturday→Friday around `today`
-      const ref = parseDate(today);
-      const offsetSat = (ref.getDay()+1)%7;
-      const startSat  = new Date(ref);
-      startSat.setDate(ref.getDate() - offsetSat);
-      const labels7 = [], data7 = [];
+      const ref=parseDate(today);
+
+      // Weekly: Sunday→Saturday
+      const offsetSun=ref.getDay();
+      const startSun=new Date(ref);
+      startSun.setDate(ref.getDate()-offsetSun);
+      const labels7=[],data7=[];
       for(let i=0;i<7;i++){
-        const d = new Date(startSat);
-        d.setDate(startSat.getDate() + i);
-        labels7.push(d.toLocaleDateString(undefined,{weekday:'short'}));
+        const d=new Date(startSun);
+        d.setDate(startSun.getDate()+i);
+        const wd=d.toLocaleDateString(undefined,{weekday:'short'});
+        labels7.push(`${wd}\n${d.getMonth()+1}/${d.getDate()}`);
         data7.push(taskLog[formatDate(d)]||0);
       }
-      // Monthly: days 1→N of tracker’s month
-      const ref0 = parseDate(today), Y=ref0.getFullYear(), M=ref0.getMonth();
-      const dim = new Date(Y, M+1, 0).getDate();
-      const labelsM=[], dataM=[];
-      for(let d=1; d<=dim; d++){
+
+      // Monthly: days 1→N
+      const ref0=parseDate(today),Y=ref0.getFullYear(),M=ref0.getMonth();
+      const dim=new Date(Y,M+1,0).getDate();
+      const labelsM=[],dataM=[];
+      for(let d=1;d<=dim;d++){
         labelsM.push(String(d));
         dataM.push(taskLog[formatDate(new Date(Y,M,d))]||0);
       }
 
-      // Weekly Chart
-      const wCtx = document.getElementById('weeklyChart').getContext('2d');
+      // Yearly: last 12 months
+      const labelsY=[],dataY=[];
+      for(let i=11;i>=0;i--){
+        const d=new Date(Y,M,1);
+        d.setMonth(d.getMonth()-i);
+        const mShort=d.toLocaleDateString(undefined,{month:'short'});
+        const yy=String(d.getFullYear()).slice(-2);
+        labelsY.push(`${mShort} '${yy}`);
+        let sum=0;
+        Object.entries(taskLog).forEach(([k,v])=>{
+          const dt=parseDate(k);
+          if(dt.getFullYear()===d.getFullYear()&&dt.getMonth()===d.getMonth()) sum+=v;
+        });
+        dataY.push(sum);
+      }
+
+      // Weekly chart
+      const wCtx=document.getElementById('weeklyChart').getContext('2d');
       if(weeklyChart){
         weeklyChart.data.labels=labels7;
         weeklyChart.data.datasets[0].data=data7;
@@ -512,8 +523,8 @@
         });
       }
 
-      // Monthly Chart
-      const mCtx = document.getElementById('monthlyChart').getContext('2d');
+      // Monthly chart
+      const mCtx=document.getElementById('monthlyChart').getContext('2d');
       if(monthlyChart){
         monthlyChart.data.labels=labelsM;
         monthlyChart.data.datasets[0].data=dataM;
@@ -525,21 +536,35 @@
           options:{responsive:true,scales:{y:{beginAtZero:true,precision:0}}}
         });
       }
+
+      // Year chart
+      const yCtx=document.getElementById('yearChart').getContext('2d');
+      if(yearChart){
+        yearChart.data.labels=labelsY;
+        yearChart.data.datasets[0].data=dataY;
+        yearChart.update();
+      } else {
+        yearChart=new Chart(yCtx,{
+          type:'bar',
+          data:{labels:labelsY,datasets:[{label:'Tasks Completed',data:dataY,backgroundColor:'orange'}]},
+          options:{responsive:true,scales:{y:{beginAtZero:true,precision:0}}}
+        });
+      }
     }
     function toggleAnalytics(show=null){
       const modal=document.getElementById('analyticsModal'),
             ov=document.getElementById('analyticsOverlay'),
             isVis=modal.style.display==='block',
-            should= show===null ? !isVis : show;
+            should=show===null?!isVis:show;
       if(should) renderAnalytics();
       modal.style.display=should?'block':'none';
       ov.style.display=should?'block':'none';
     }
 
-    // ——— INITIALIZE ———
+    // ——— INIT ———
     document.getElementById('importInput').addEventListener('change',importTrackerData);
     document.getElementById('pomStartBtn').addEventListener('click',()=>{
-      if(!pomRunning){ pomRunning=true; document.getElementById('pomStartBtn').textContent='Running'; startWorkPhase(); }
+      if(!pomRunning){pomRunning=true;document.getElementById('pomStartBtn').textContent='Running';startWorkPhase();}
     });
     document.addEventListener('keydown',e=>{
       if(e.key.toLowerCase()==='d') toggleDarkMode();
