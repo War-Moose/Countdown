@@ -16,10 +16,7 @@
       background-color: #121212;
       color: #e0e0e0;
     }
-    .counter {
-      font-size: 1.2em;
-      margin: 5px;
-    }
+    .counter { font-size: 1.2em; margin: 5px; }
     button {
       font-size: 1.2em;
       padding: 10px 20px;
@@ -34,12 +31,9 @@
       margin-top: 20px;
     }
     .day {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       border: 1px solid #999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 0.8em;
     }
     .day.white { background-color: white; color: black; }
@@ -47,52 +41,39 @@
     .day.blue  { background-color: blue;  color: white; }
     .day.black { background-color: black; color: white; }
 
+    /* Title badges */
     #title-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       margin-bottom: 10px;
     }
     .title-badge {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5em;
-      cursor: pointer;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5em; cursor: pointer;
     }
 
+    /* Settings menu overlay */
     #menuOverlay {
-      display: none;
-      position: fixed; top:0; left:0;
-      width:100vw; height:100vh;
-      background: rgba(0,0,0,0.5);
+      display: none; position: fixed; top:0; left:0;
+      width:100vw; height:100vh; background: rgba(0,0,0,0.5);
       z-index: 999;
     }
     #settingsMenu {
-      display: none;
-      position: fixed; top:20%; left:50%;
-      transform: translate(-50%, -20%);
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 30px;
-      border-radius: 10px;
-      z-index: 1000;
+      display: none; position: fixed; top:20%; left:50%;
+      transform: translate(-50%,-20%);
+      background: rgba(0,0,0,0.8); color: white;
+      padding: 30px; border-radius: 10px; z-index: 1000;
       text-align: center;
     }
     #settingsMenu button,
     #settingsMenu select {
-      display: block;
-      width: 80%;
-      margin: 10px auto;
-      font-size: 1em;
-      padding: 8px;
+      display: block; width: 80%; margin: 10px auto;
+      font-size: 1em; padding: 8px;
     }
 
+    /* Badge modal */
     #badgeModal {
-      display: none;
-      position: fixed; top:10%; left:50%;
+      display: none; position: fixed; top:10%; left:50%;
       transform: translateX(-50%);
       background: #222; color: #fff;
       padding: 20px; border-radius: 10px;
@@ -100,19 +81,43 @@
     }
     #badgeGrid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
+      grid-template-columns: repeat(auto-fill,minmax(80px,1fr));
       gap: 15px; justify-items: center; margin-top: 20px;
     }
     #badgePopup {
-      display: none;
-      position: fixed; top:20px; left:50%;
+      display: none; position: fixed; top:20px; left:50%;
       transform: translateX(-50%);
       background: #333; color: #fff;
-      padding: 15px 30px; border-radius:8px;
-      z-index:3000; box-shadow:0 0 10px #000;
-      font-weight:bold;
+      padding: 15px 30px; border-radius: 8px;
+      z-index: 3000; box-shadow: 0 0 10px #000;
+      font-weight: bold;
     }
 
+    /* Pomodoro modal overlay */
+    #pomodoroOverlay {
+      display: none; position: fixed; top:0; left:0;
+      width:100vw; height:100vh; background: rgba(0,0,0,0.5);
+      z-index: 3500;
+    }
+    .pom-modal {
+      display: none; position: fixed; top:50%; left:50%;
+      transform: translate(-50%,-50%);
+      background-color: #fff; color: #000;
+      padding: 20px; border-radius: 8px;
+      z-index: 4000; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+    body.dark .pom-modal {
+      background-color: #333; color: #e0e0e0;
+    }
+    .pom-modal p {
+      font-size: 2em; margin: 10px 0;
+    }
+    .pom-modal button {
+      margin: 5px;
+    }
+
+    /* Glow animation */
     @keyframes streakPop {
       0%   { transform: scale(1); }
       50%  { transform: scale(1.3); }
@@ -120,8 +125,7 @@
     }
     .streak-boost {
       animation: streakPop 0.8s ease-in-out;
-      color: orange;
-      text-shadow: 0 0 8px orange, 0 0 12px black;
+      color: orange; text-shadow: 0 0 8px orange, 0 0 12px black;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -130,7 +134,7 @@
   <!-- Title with left/right badges -->
   <div id="title-container">
     <div id="badgeLeft" class="title-badge"></div>
-    <h1 style="margin: 0 10px;">Daily Task Tracker v1.2</h1>
+    <h1 style="margin:0 10px;">Daily Task Tracker v1.2</h1>
     <div id="badgeRight" class="title-badge"></div>
   </div>
 
@@ -142,7 +146,7 @@
   <p class="counter">Current Streak: <span id="streak"></span> days</p>
   <p class="counter">Longest Streak: <span id="longestStreak"></span> days</p>
 
-  <!-- Controls (Menu button added) -->
+  <!-- Controls (Pomodoro button added) -->
   <button onclick="completeTask()">Complete Task</button>
   <button onclick="resetDay()">Reset Day</button>
   <button onclick="advanceDay(-1)">-1 Day</button>
@@ -151,6 +155,7 @@
   <input type="file" id="importInput" accept=".json" style="display:none" />
   <button onclick="document.getElementById('importInput').click()">Import Backup</button>
   <button onclick="toggleMenu()">Menu</button>
+  <button onclick="togglePomodoro()">Pomodoro</button>
 
   <!-- Calendar -->
   <div class="calendar" id="calendar"></div>
@@ -179,8 +184,17 @@
   </div>
   <div id="badgePopup"></div>
 
+  <!-- Pomodoro modal + overlay -->
+  <div id="pomodoroOverlay" onclick="togglePomodoro(false)"></div>
+  <div id="pomodoroModal" class="pom-modal">
+    <h2>Pomodoro Timer</h2>
+    <p id="pomTimerDisplay">25:00</p>
+    <button id="pomStartBtn">Start Pomodoro</button>
+    <button onclick="togglePomodoro(false)">Close</button>
+  </div>
+
   <script>
-    // Initialization
+    // ——— Core state & storage ———
     const defaultTasks = 3;
     let now    = new Date();
     let today  = now.toISOString().split("T")[0];
@@ -193,7 +207,6 @@
     const taskLog      = JSON.parse(localStorage.getItem("taskLog") || "{}");
     let savedDate      = localStorage.getItem("taskDate");
 
-    // Daily reset of tasks only
     if (savedDate !== today) {
       tasksDone = 0;
       tasksLeft = defaultTasks;
@@ -202,7 +215,7 @@
       localStorage.setItem("taskDate", today);
     }
 
-    // Load or init badges
+    // ——— Badges setup ———
     let badges = JSON.parse(localStorage.getItem("badges"));
     if (!Array.isArray(badges) || badges.length !== 3) {
       badges = [
@@ -213,7 +226,7 @@
       localStorage.setItem("badges", JSON.stringify(badges));
     }
 
-    // Full-history longest streak
+    // ——— Longest streak (full history) ———
     function calculateLongestStreak() {
       const doneDates = Object.keys(taskLog)
         .filter(d => taskLog[d] >= defaultTasks)
@@ -232,7 +245,7 @@
       return maxS;
     }
 
-    // Day-to-day streak + recalc longest
+    // ——— Current streak + update longest ———
     function updateStreakFromCalendar() {
       const y = new Date(today);
       y.setDate(y.getDate() - 1);
@@ -249,7 +262,7 @@
       localStorage.setItem("longestStreak", longestStreak);
     }
 
-    // Badge logic
+    // ——— Badge logic ———
     function checkBadges() {
       let updated = false;
       badges.forEach(b => {
@@ -275,6 +288,7 @@
       });
     }
 
+    // ——— Calendar draw ———
     function drawCalendar() {
       const cal = document.getElementById("calendar");
       cal.innerHTML = "";
@@ -284,27 +298,24 @@
         const key = new Date(Y, M, d).toISOString().split("T")[0];
         const v   = taskLog[key] || 0;
         const box = document.createElement("div");
-        box.className = "day " + (v===0?"white":v===1?"red":v===2?"blue":"black");
+        box.className   = "day " + (v===0?"white":v===1?"red":v===2?"blue":"black");
         box.textContent = d;
         cal.appendChild(box);
       }
     }
 
-    // Title badges
+    // ——— Title badge slots ———
     function updateTitleBadges() {
       const leftId  = localStorage.getItem("titleBadgeLeft");
       const rightId = localStorage.getItem("titleBadgeRight");
       const map     = Object.fromEntries(badges.map(b => [b.id, b]));
       const leftEl  = document.getElementById("badgeLeft");
       const rightEl = document.getElementById("badgeRight");
-      if (map[leftId]) {
-        leftEl.textContent = "🏅"; leftEl.title = map[leftId].name;
-      } else leftEl.textContent = "";
-      if (map[rightId]) {
-        rightEl.textContent = "🏅"; rightEl.title = map[rightId].name;
-      } else rightEl.textContent = "";
+      if (map[leftId]) { leftEl.textContent = "🏅"; leftEl.title = map[leftId].name; }
+      else leftEl.textContent = "";
+      if (map[rightId]) { rightEl.textContent= "🏅"; rightEl.title= map[rightId].name; }
+      else rightEl.textContent = "";
     }
-
     function initTitleBadgeSelectors() {
       const selL = document.getElementById("selectLeftBadge");
       const selR = document.getElementById("selectRightBadge");
@@ -325,6 +336,7 @@
       };
     }
 
+    // ——— Update all UI ———
     function updateDisplays() {
       document.getElementById("currentDate").textContent     = today;
       document.getElementById("tasksLeft").textContent      = tasksLeft;
@@ -339,6 +351,7 @@
       updateTitleBadges();
     }
 
+    // ——— Task completion + confetti + glow ———
     function completeTask() {
       if (tasksLeft > 0) tasksLeft--;
       tasksDone++; totalTasksDone++;
@@ -357,7 +370,7 @@
         setTimeout(() => el.classList.remove("streak-boost"), 800);
       }
       if (longestStreak > prevLong) {
-        const elL = document.getElementById("longestStreak");
+        const elL= document.getElementById("longestStreak");
         elL.classList.add("streak-boost");
         setTimeout(() => elL.classList.remove("streak-boost"), 800);
       }
@@ -400,13 +413,13 @@
 
     function advanceDay(offset) {
       const d = new Date(today);
-      d.setDate(d.getDate()+offset);
+      d.setDate(d.getDate() + offset);
       today = d.toISOString().split("T")[0];
       if (today !== localStorage.getItem("taskDate")) {
         tasksDone = 0; tasksLeft = defaultTasks;
-        localStorage.setItem("tasksDone", tasksDone);
-        localStorage.setItem("tasksLeft", tasksLeft);
-        localStorage.setItem("taskDate", today);
+        localStorage.setItem("tasksDone",  tasksDone);
+        localStorage.setItem("tasksLeft",  tasksLeft);
+        localStorage.setItem("taskDate",   today);
       }
       updateDisplays();
     }
@@ -457,30 +470,111 @@
       setTimeout(() => p.style.display = "none", 3000);
     }
 
-    function toggleDarkMode() {
-      const isDark = document.body.classList.toggle("dark");
-      localStorage.setItem("darkMode", isDark);
+    // ——— Pomodoro implementation ———
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let noiseSource;
+    function playTone(duration = 0.2) {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = 440;
+      osc.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
     }
-    function toggleMenu(show = null) {
-      const ov = document.getElementById("menuOverlay"),
-            sm = document.getElementById("settingsMenu");
-      const open = show===null ? (sm.style.display !== "block") : show;
-      ov.style.display = open ? "block" : "none";
-      sm.style.display = open ? "block" : "none";
+    function startWhiteNoise() {
+      const bufferSize = 2 * audioCtx.sampleRate;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      noiseSource = audioCtx.createBufferSource();
+      noiseSource.buffer = buffer;
+      noiseSource.loop = true;
+      noiseSource.connect(audioCtx.destination);
+      noiseSource.start();
     }
-    function toggleBadgeModal(show = null) {
-      const m    = document.getElementById("badgeModal"),
-            open = show===null ? (m.style.display !== "block") : show;
-      m.style.display = open ? "block" : "none";
+    function stopWhiteNoise() {
+      if (noiseSource) {
+        noiseSource.stop();
+        noiseSource.disconnect();
+        noiseSource = null;
+      }
     }
 
-    document.getElementById("importInput").addEventListener("change", importTrackerData);
-    document.addEventListener("keydown", e => {
-      if (e.key.toLowerCase() === "d") toggleDarkMode();
-      if (e.key.toLowerCase() === "m") toggleMenu();
+    let pomInterval, pomPhase, pomTime;
+    let pomRunning = false;
+
+    function updatePomTimerDisplay() {
+      const m = String(Math.floor(pomTime / 60)).padStart(2, '0');
+      const s = String(pomTime % 60).padStart(2, '0');
+      document.getElementById('pomTimerDisplay').textContent = `${m}:${s}`;
+    }
+
+    function tickPom() {
+      pomTime--;
+      updatePomTimerDisplay();
+      if (pomTime <= 0) {
+        clearInterval(pomInterval);
+        if (pomPhase === 'work') {
+          stopWhiteNoise();
+          playTone(0.5);
+          startBreakPhase();
+        } else {
+          playTone(0.5);
+          pomRunning = false;
+          document.getElementById('pomStartBtn').textContent = 'Start Pomodoro';
+        }
+      }
+    }
+
+    function startWorkPhase() {
+      pomPhase = 'work';
+      pomTime  = 25 * 60;
+      updatePomTimerDisplay();
+      playTone(0.2);
+      startWhiteNoise();
+      pomInterval = setInterval(tickPom, 1000);
+    }
+
+    function startBreakPhase() {
+      pomPhase = 'break';
+      pomTime  = 5 * 60;
+      updatePomTimerDisplay();
+      playTone(0.2);
+      pomInterval = setInterval(tickPom, 1000);
+    }
+
+    function togglePomodoro(show = null) {
+      const modal   = document.getElementById('pomodoroModal');
+      const overlay = document.getElementById('pomodoroOverlay');
+      const isVis   = modal.style.display === 'block';
+      const should  = show === null ? !isVis : show;
+      modal.style.display   = should ? 'block' : 'none';
+      overlay.style.display = should ? 'block' : 'none';
+      if (!should && pomRunning) {
+        clearInterval(pomInterval);
+        stopWhiteNoise();
+        pomRunning = false;
+        document.getElementById('pomStartBtn').textContent = 'Start Pomodoro';
+        updatePomTimerDisplay();
+      }
+    }
+
+    // ——— Setup event listeners ———
+    document.getElementById('importInput').addEventListener('change', importTrackerData);
+    document.getElementById('pomStartBtn').addEventListener('click', () => {
+      if (!pomRunning) {
+        pomRunning = true;
+        document.getElementById('pomStartBtn').textContent = 'Running';
+        startWorkPhase();
+      }
     });
-    if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark");
+    document.addEventListener('keydown', e => {
+      if (e.key.toLowerCase() === 'd') toggleDarkMode();
+      if (e.key.toLowerCase() === 'm') toggleMenu();
+    });
+    if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark');
 
+    // ——— Initialize ———
     initTitleBadgeSelectors();
     updateDisplays();
   </script>
