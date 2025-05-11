@@ -17,153 +17,131 @@
       background-color: #121212;
       color: #e0e0e0;
     }
-    .counter {
-      font-size: 1.2em;
-      margin: 5px;
-    }
+    .counter { font-size:1.2em; margin:5px }
     button {
-      font-size: 1.2em;
-      padding: 10px 20px;
-      cursor: pointer;
-      margin: 10px;
+      font-size:1.2em; padding:10px 20px;
+      margin:10px; cursor:pointer;
     }
     /* Calendar */
     .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 40px);
-      gap: 4px;
-      justify-content: center;
-      margin-top: 20px;
+      display:grid;
+      grid-template-columns:repeat(7,40px);
+      gap:4px;
+      justify-content:center;
+      margin-top:20px;
     }
     .day {
-      width: 40px;
-      height: 40px;
-      border: 1px solid #999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8em;
+      width:40px; height:40px;
+      border:1px solid #999;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.8em;
     }
-    .day.white { background-color: white; color: black; }
-    .day.red   { background-color: red;   color: white; }
-    .day.blue  { background-color: blue;  color: white; }
-    .day.black { background-color: black; color: white; }
+    .day.white { background:white; color:black; }
+    .day.red   { background:red;   color:white; }
+    .day.blue  { background:blue;  color:white; }
+    .day.black { background:black; color:white; }
 
     /* Title badges */
     #title-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 10px;
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:10px;
     }
     .title-badge {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5em;
-      cursor: pointer;
+      width:40px; height:40px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5em; cursor:pointer;
     }
 
     /* Settings menu */
     #menuOverlay {
-      display: none;
-      position: fixed; top:0; left:0;
-      width:100vw; height:100vh;
-      background: rgba(0,0,0,0.5);
-      z-index: 999;
+      display:none; position:fixed; top:0; left:0;
+      width:100vw; height:100vh; background:rgba(0,0,0,0.5);
+      z-index:999;
     }
     #settingsMenu {
-      display: none;
-      position: fixed; top:20%; left:50%;
-      transform: translate(-50%,-20%);
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 30px; border-radius: 10px; z-index: 1000;
-      text-align: center;
+      display:none; position:fixed; top:20%; left:50%;
+      transform:translate(-50%,-20%);
+      background:rgba(0,0,0,0.8); color:white;
+      padding:30px; border-radius:10px; z-index:1000;
+      text-align:center;
     }
     #settingsMenu button,
     #settingsMenu select {
-      display: block; width: 80%; margin: 10px auto;
-      font-size: 1em; padding: 8px;
+      display:block; width:80%; margin:10px auto;
+      font-size:1em; padding:8px;
     }
 
     /* Badge modal */
     #badgeModal {
-      display: none;
-      position: fixed; top:10%; left:50%;
-      transform: translateX(-50%);
-      background: #222; color: #fff;
-      padding: 20px; border-radius: 10px;
-      z-index: 2000; max-width: 600px; text-align: center;
+      display:none; position:fixed; top:10%; left:50%;
+      transform:translateX(-50%);
+      background:#222; color:#fff;
+      padding:20px; border-radius:10px;
+      z-index:2000; max-width:600px; text-align:center;
     }
     #badgeGrid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(80px,1fr));
-      gap: 15px; justify-items: center; margin-top: 20px;
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+      gap:15px; justify-items:center; margin-top:20px;
     }
     #badgePopup {
-      display: none;
-      position: fixed; top:20px; left:50%;
-      transform: translateX(-50%);
-      background: #333; color: #fff;
-      padding: 15px 30px; border-radius:8px;
+      display:none; position:fixed; top:20px; left:50%;
+      transform:translateX(-50%);
+      background:#333; color:#fff;
+      padding:15px 30px; border-radius:8px;
       z-index:3000; box-shadow:0 0 10px #000;
       font-weight:bold;
     }
 
-    /* Streak glow animation */
+    /* Streak glow */
     @keyframes streakPop {
       0%   { transform: scale(1); }
       50%  { transform: scale(1.3); }
       100% { transform: scale(1); }
     }
     .streak-boost {
-      animation: streakPop 0.8s ease-in-out;
-      color: orange;
-      text-shadow: 0 0 8px orange, 0 0 12px black;
+      animation:streakPop 0.8s ease-in-out;
+      color:orange;
+      text-shadow:0 0 8px orange, 0 0 12px black;
     }
 
     /* Pomodoro modal + progress ring */
     #pomodoroOverlay {
-      display: none;
-      position: fixed; top:0; left:0;
-      width:100vw; height:100vh;
-      background: rgba(0,0,0,0.5);
-      z-index: 3500;
+      display:none; position:fixed; top:0; left:0;
+      width:100vw; height:100vh; background:rgba(0,0,0,0.5);
+      z-index:3500;
     }
     .pom-modal {
-      display: none;
-      position: fixed; top:50%; left:50%;
-      transform: translate(-50%,-50%);
-      background-color: #fff; color: #000;
-      padding: 20px; border-radius: 8px;
-      z-index: 4000; box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      text-align: center; width: 200px;
+      display:none; position:fixed; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      background-color:#fff; color:#000;
+      padding:20px; border-radius:8px; z-index:4000;
+      box-shadow:0 0 10px rgba(0,0,0,0.5);
+      text-align:center; width:200px;
     }
     body.dark .pom-modal {
-      background-color: #333; color: #e0e0e0;
+      background-color:#333; color:#e0e0e0;
     }
     #pomProgressContainer {
-      position: relative;
-      width: 140px; height: 140px;
-      margin: 20px auto;
-      border-radius: 50%;
-      background: conic-gradient(grey 0%, grey 100%);
+      position:relative;
+      width:140px; height:140px;
+      margin:20px auto;
+      border-radius:50%;
+      /* Now black background */
+      background: conic-gradient(black 0%, black 100%);
     }
     #pomTimerDisplay {
-      position: absolute;
-      width: 100%; height: 100%;
-      top: 0; left: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.5em;
+      position:absolute;
+      width:100%; height:100%;
+      top:0; left:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5em;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <!-- Title with badges -->
+  <!-- Title + badges -->
   <div id="title-container">
     <div id="badgeLeft" class="title-badge"></div>
     <h1 style="margin:0 10px;">Daily Task Tracker v1.2</h1>
@@ -184,7 +162,7 @@
   <button onclick="advanceDay(-1)">-1 Day</button>
   <button onclick="advanceDay(1)">+1 Day</button>
   <button onclick="exportTrackerData()">Save Backup</button>
-  <input type="file" id="importInput" accept=".json" style="display:none" />
+  <input type="file" id="importInput" accept=".json" style="display:none"/>
   <button onclick="document.getElementById('importInput').click()">Import Backup</button>
   <button onclick="toggleMenu()">Menu</button>
   <button onclick="togglePomodoro()">Pomodoro</button>
@@ -228,7 +206,7 @@
   </div>
 
   <script>
-    // —— Core state & localStorage ——  
+    // —— Core state & storage ——  
     const defaultTasks = 3;
     let now    = new Date();
     let today  = now.toISOString().split("T")[0];
@@ -262,14 +240,12 @@
 
     // —— Longest streak (full-history) ——  
     function calculateLongestStreak() {
-      const doneDates = Object.keys(taskLog)
-        .filter(d => taskLog[d] >= defaultTasks)
-        .sort();
+      const doneDates = Object.keys(taskLog).filter(d=>taskLog[d]>=defaultTasks).sort();
       let maxS=0, temp=0, prev=null;
       for (const iso of doneDates) {
         if (prev) {
           const diff = Math.round((new Date(iso)-new Date(prev))/86400000);
-          temp = diff===1 ? temp+1 : 1;
+          temp = diff===1? temp+1:1;
         } else {
           temp = 1;
         }
@@ -281,34 +257,33 @@
 
     // —— Current streak + update longest ——  
     function updateStreakFromCalendar() {
-      const y = new Date(today);
-      y.setDate(y.getDate()-1);
-      const prevKey   = y.toISOString().split("T")[0];
-      const prevDone  = (taskLog[prevKey]||0) >= defaultTasks;
-      const todayDone = (taskLog[today]  ||0) >= defaultTasks;
+      const y=new Date(today); y.setDate(y.getDate()-1);
+      const prevKey = y.toISOString().split("T")[0];
+      const prevDone = (taskLog[prevKey]||0)>=defaultTasks;
+      const todayDone= (taskLog[today]  ||0)>=defaultTasks;
 
       if (!prevDone) streak=0;
       if (todayDone)  streak++;
 
-      longestStreak = calculateLongestStreak();
+      longestStreak=calculateLongestStreak();
 
       localStorage.setItem("streak", streak);
       localStorage.setItem("longestStreak", longestStreak);
     }
 
     // —— Badge logic ——  
-    function checkBadges() {
+    function checkBadges(){
       let updated=false;
       badges.forEach(b=>{
         if (!b.unlocked) {
           if (b.id==="badge_first"    && totalTasksDone>=1) { b.unlocked=true; showBadgePopup(b.name); updated=true; }
-          else if(b.id==="badge_five" && totalTasksDone>=5) { b.unlocked=true; showBadgePopup(b.name); updated=true; }
-          else if(b.id==="badge_streak3"&& streak>=3)       { b.unlocked=true; showBadgePopup(b.name); updated=true; }
+          else if (b.id==="badge_five" && totalTasksDone>=5) { b.unlocked=true; showBadgePopup(b.name); updated=true; }
+          else if (b.id==="badge_streak3"&& streak>=3)       { b.unlocked=true; showBadgePopup(b.name); updated=true; }
         }
       });
-      if(updated) localStorage.setItem("badges", JSON.stringify(badges));
+      if(updated) localStorage.setItem("badges",JSON.stringify(badges));
     }
-    function initializeBadges() {
+    function initializeBadges(){
       const grid=document.getElementById("badgeGrid");
       grid.innerHTML="";
       badges.forEach(b=>{
@@ -322,32 +297,29 @@
     }
 
     // —— Calendar draw ——  
-    function drawCalendar() {
+    function drawCalendar(){
       const cal=document.getElementById("calendar");
       cal.innerHTML="";
-      const c=new Date(today), Y=c.getFullYear(), M=c.getMonth();
+      const c=new Date(today),Y=c.getFullYear(),M=c.getMonth();
       const days=new Date(Y,M+1,0).getDate();
-      for(let d=1; d<=days; d++){
+      for(let d=1;d<=days;d++){
         const key=new Date(Y,M,d).toISOString().split("T")[0];
         const v=taskLog[key]||0;
         const box=document.createElement("div");
         box.className="day "+(v===0?"white":v===1?"red":v===2?"blue":"black");
-        box.textContent=d;
-        cal.appendChild(box);
+        box.textContent=d; cal.appendChild(box);
       }
     }
 
     // —— Title badges slots ——  
-    function updateTitleBadges() {
+    function updateTitleBadges(){
       const leftId=localStorage.getItem("titleBadgeLeft"),
             rightId=localStorage.getItem("titleBadgeRight"),
             map=Object.fromEntries(badges.map(b=>[b.id,b])),
             leftEl=document.getElementById("badgeLeft"),
             rightEl=document.getElementById("badgeRight");
-      if(map[leftId]){ leftEl.textContent="🏅"; leftEl.title=map[leftId].name; }
-      else leftEl.textContent="";
-      if(map[rightId]){ rightEl.textContent="🏅"; rightEl.title=map[rightId].name; }
-      else rightEl.textContent="";
+      if(map[leftId]){ leftEl.textContent="🏅"; leftEl.title=map[leftId].name; } else leftEl.textContent="";
+      if(map[rightId]){ rightEl.textContent="🏅"; rightEl.title=map[rightId].name; } else rightEl.textContent="";
     }
     function initTitleBadgeSelectors(){
       const selL=document.getElementById("selectLeftBadge"),
@@ -359,11 +331,11 @@
       });
       selL.value=localStorage.getItem("titleBadgeLeft")||badges[0].id;
       selR.value=localStorage.getItem("titleBadgeRight")||badges[1].id;
-      selL.onchange=e=>{ localStorage.setItem("titleBadgeLeft",e.target.value); updateTitleBadges(); };
-      selR.onchange=e=>{ localStorage.setItem("titleBadgeRight",e.target.value);updateTitleBadges();};
+      selL.onchange=e=>{localStorage.setItem("titleBadgeLeft",e.target.value);updateTitleBadges()};
+      selR.onchange=e=>{localStorage.setItem("titleBadgeRight",e.target.value);updateTitleBadges()};
     }
 
-    // —— Update all displays ——  
+    // —— Update all UI ——  
     function updateDisplays(){
       document.getElementById("currentDate").textContent=today;
       document.getElementById("tasksLeft").textContent=tasksLeft;
@@ -403,12 +375,7 @@
       }
 
       if(tasksDone>=defaultTasks){
-        confetti({
-          particleCount:100,
-          spread:60,
-          origin:{y:0.6},
-          colors:['#000000','#FFA500']
-        });
+        confetti({particleCount:100,spread:60,origin:{y:0.6},colors:['#000000','#FFA500']});
       }
     }
 
@@ -453,8 +420,8 @@
       const data={tasksLeft,tasksDone,totalTasksDone,streak,longestStreak,taskLog,badges};
       const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob),a=document.createElement("a");
-      a.href=url; a.download=`backup-${today}.json`;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      a.href=url;a.download=`backup-${today}.json`;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
     }
 
     function importTrackerData(evt){
@@ -495,31 +462,46 @@
       const isDark=document.body.classList.toggle("dark");
       localStorage.setItem("darkMode",isDark);
     }
-
     function toggleMenu(show=null){
       const ov=document.getElementById("menuOverlay"),
             sm=document.getElementById("settingsMenu"),
-            open=show===null ? (sm.style.display!=="block") : show;
+            open=show===null?(sm.style.display!=="block"):show;
       ov.style.display=open?"block":"none";
       sm.style.display=open?"block":"none";
     }
-
     function toggleBadgeModal(show=null){
       const m=document.getElementById("badgeModal"),
-            open=show===null ? (m.style.display!=="block") : show;
+            open=show===null?(m.style.display!=="block"):show;
       m.style.display=open?"block":"none";
     }
 
-    // —— Rain sound setup ——  
-    const rainAudio=new Audio(
-      'https://assets.mixkit.co/sfx/preview/mixkit-light-rain-loop-2393.mp3'
-    );
-    rainAudio.loop=true;
-    function startRain(){ if(rainAudio.paused) rainAudio.play(); }
-    function stopRain(){ rainAudio.pause(); rainAudio.currentTime=0; }
+    // —— Built-in noise generator (white noise + low-pass) ——  
+    const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    let noiseSource, noiseFilter;
+    function startNoise(){
+      const bufferSize=2*audioCtx.sampleRate;
+      const buffer=audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate);
+      const data=buffer.getChannelData(0);
+      for(let i=0;i<bufferSize;i++) data[i]=Math.random()*2-1;
+      noiseSource=audioCtx.createBufferSource();
+      noiseSource.buffer=buffer;
+      noiseSource.loop=true;
+      noiseFilter=audioCtx.createBiquadFilter();
+      noiseFilter.type='lowpass';
+      noiseFilter.frequency.value=1000;
+      noiseSource.connect(noiseFilter);
+      noiseFilter.connect(audioCtx.destination);
+      noiseSource.start();
+    }
+    function stopNoise(){
+      if(noiseSource){
+        noiseSource.stop();
+        noiseSource.disconnect();
+        noiseFilter.disconnect();
+      }
+    }
 
     // —— Tone helper ——  
-    const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
     function playTone(duration=0.2){
       const osc=audioCtx.createOscillator();
       osc.type='sine'; osc.frequency.value=440;
@@ -538,14 +520,14 @@
       const total=(pomPhase==='work'?25*60:5*60),
             pct=((total-pomTime)/total)*100,
             ring=document.getElementById('pomProgressContainer');
-      ring.style.background=`conic-gradient(orange ${pct}%, lightgrey ${pct}% 100%)`;
+      ring.style.background=`conic-gradient(orange ${pct}%, black ${pct}% 100%)`;
     }
     function tickPom(){
       pomTime--; updatePomTimerDisplay(); updateProgressRing();
       if(pomTime<=0){
         clearInterval(pomInterval);
         if(pomPhase==='work'){
-          stopRain(); playTone(0.5); startBreakPhase();
+          stopNoise(); playTone(0.5); startBreakPhase();
         } else {
           playTone(0.5);
           pomRunning=false;
@@ -556,7 +538,7 @@
     function startWorkPhase(){
       pomPhase='work'; pomTime=25*60;
       updatePomTimerDisplay(); updateProgressRing();
-      playTone(0.2); startRain();
+      playTone(0.2); startNoise();
       pomInterval=setInterval(tickPom,1000);
     }
     function startBreakPhase(){
@@ -569,11 +551,13 @@
       const modal=document.getElementById('pomodoroModal'),
             overlay=document.getElementById('pomodoroOverlay'),
             isVis=modal.style.display==='block',
-            should=show===null? !isVis : show;
+            should=show===null?!isVis:show;
       modal.style.display=should?'block':'none';
       overlay.style.display=should?'block':'none';
       if(!should && pomRunning){
-        clearInterval(pomInterval); stopRain(); pomRunning=false;
+        clearInterval(pomInterval);
+        stopNoise();
+        pomRunning=false;
         document.getElementById('pomStartBtn').textContent='Start Pomodoro';
         pomPhase='work'; pomTime=25*60;
         updatePomTimerDisplay(); updateProgressRing();
@@ -581,15 +565,15 @@
     }
 
     // —— Event listeners & init ——  
-    document.getElementById('importInput').addEventListener('change', importTrackerData);
-    document.getElementById('pomStartBtn').addEventListener('click', ()=>{
+    document.getElementById('importInput').addEventListener('change',importTrackerData);
+    document.getElementById('pomStartBtn').addEventListener('click',()=>{
       if(!pomRunning){
         pomRunning=true;
         document.getElementById('pomStartBtn').textContent='Running';
         startWorkPhase();
       }
     });
-    document.addEventListener('keydown', e=>{
+    document.addEventListener('keydown',e=>{
       if(e.key.toLowerCase()==='d') toggleDarkMode();
       if(e.key.toLowerCase()==='m') toggleMenu();
     });
