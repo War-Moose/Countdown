@@ -6,51 +6,245 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
-    /* ——— existing styles, unchanged ——— */
-    body { font-family:sans-serif; text-align:center; padding:20px; background:#f0f0f0; color:#000; }
-    body.dark { background:#121212; color:#e0e0e0; }
-    .counter { font-size:1.2em; margin:5px }
-    button { font-size:1.2em; padding:10px 20px; margin:10px; cursor:pointer; }
-    .calendar { display:grid; grid-template-columns:repeat(7,40px); gap:4px; justify-content:center; margin-top:20px; }
-    .day { width:40px;height:40px;border:1px solid #999; display:flex;align-items:center;justify-content:center; font-size:0.8em; }
-    .day.white{background:white;color:black}.day.red{background:red;color:white}.day.blue{background:blue;color:white}.day.black{background:black;color:white}
-    #title-container { display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
-    .title-badge { width:40px;height:40px; display:flex;align-items:center;justify-content:center;font-size:1.5em;cursor:pointer; }
-    #menuOverlay { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:999; }
-    #settingsMenu { display:none; position:fixed; top:20%; left:50%; transform:translate(-50%,-20%); background:rgba(0,0,0,0.8); color:white; padding:30px; border-radius:10px; z-index:1000; text-align:center; }
-    #settingsMenu button,#settingsMenu select { display:block; width:80%; margin:10px auto; font-size:1em; padding:8px; }
-    #badgeModal { display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:20px; border-radius:10px; z-index:2000; max-width:600px; text-align:center; }
-    #badgeGrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:15px; justify-items:center; margin-top:20px; }
-    #badgePopup { display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:15px 30px; border-radius:8px; z-index:3000; box-shadow:0 0 10px #000; font-weight:bold; }
-    @keyframes streakPop {0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
-    .streak-boost { animation:streakPop 0.8s ease-in-out; color:orange; text-shadow:0 0 8px orange,0 0 12px black; }
+    /* ——— CORE STYLES ——— */
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #f0f0f0;
+      color: #000;
+    }
+    body.dark {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    .counter {
+      font-size: 1.2em;
+      margin: 5px;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
 
-    /* Pomodoro */
-    #pomodoroOverlay { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:3500; }
-    .pom-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; color:#000; padding:20px; border-radius:8px; z-index:4000; box-shadow:0 0 10px rgba(0,0,0,0.5); text-align:center; width:200px; }
-    body.dark .pom-modal { background:#333; color:#e0e0e0; }
-    #pomProgressContainer { position:relative; width:140px; height:140px; margin:20px auto; border-radius:50%; background:conic-gradient(black 0%, black 100%); }
-    #pomTimerDisplay { position:absolute; width:100%; height:100%; top:0; left:0; display:flex; align-items:center; justify-content:center; font-size:1.5em; }
+    /* ——— CALENDAR ——— */
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 40px);
+      gap: 4px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .day {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8em;
+    }
+    .day.white { background-color: white; color: black; }
+    .day.red   { background-color: red;   color: white; }
+    .day.blue  { background-color: blue;  color: white; }
+    .day.black { background-color: black; color: white; }
 
-    /* Analytics */
-    #analyticsOverlay { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:3500; }
-    .analytics-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; color:#000; padding:20px; border-radius:8px; z-index:4000; box-shadow:0 0 10px rgba(0,0,0,0.5); width:90%; max-width:600px; text-align:center; overflow-y:auto; max-height:90vh; }
-    body.dark .analytics-modal { background:#333; color:#e0e0e0; }
-    .analytics-modal h2 { margin-top:0; }
-    .chart-nav { display:flex; justify-content:center; align-items:center; margin-bottom:8px; }
-    .chart-nav button { margin:0 10px; }
+    /* ——— TITLE & BADGES ——— */
+    #title-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .title-badge {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+
+    /* ——— SETTINGS MENU ——— */
+    #menuOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+    #settingsMenu {
+      display: none;
+      position: fixed;
+      top: 20%; left: 50%;
+      transform: translate(-50%, -20%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      z-index: 1000;
+      text-align: center;
+      width: 80%;
+      max-width: 300px;
+    }
+    #settingsMenu button,
+    #settingsMenu select {
+      display: block;
+      width: 80%;
+      margin: 10px auto;
+      font-size: 1em;
+      padding: 8px;
+    }
+
+    /* ——— BADGE MODAL ——— */
+    #badgeModal {
+      display: none;
+      position: fixed;
+      top: 10%; left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 2000;
+      max-width: 600px;
+      text-align: center;
+    }
+    #badgeGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 15px;
+      justify-items: center;
+      margin-top: 20px;
+    }
+    #badgePopup {
+      display: none;
+      position: fixed;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 15px 30px;
+      border-radius: 8px;
+      z-index: 3000;
+      box-shadow: 0 0 10px #000;
+      font-weight: bold;
+    }
+
+    /* ——— STREAK GLOW ——— */
+    @keyframes streakPop {
+      0% { transform: scale(1) }
+      50% { transform: scale(1.3) }
+      100% { transform: scale(1) }
+    }
+    .streak-boost {
+      animation: streakPop 0.8s ease-in-out;
+      color: orange;
+      text-shadow: 0 0 8px orange, 0 0 12px black;
+    }
+
+    /* ——— POMODORO ——— */
+    #pomodoroOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 3500;
+    }
+    .pom-modal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 8px;
+      z-index: 4000;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      text-align: center;
+      width: 200px;
+    }
+    body.dark .pom-modal {
+      background: #333;
+      color: #e0e0e0;
+    }
+    #pomProgressContainer {
+      position: relative;
+      width: 140px; height: 140px;
+      margin: 20px auto;
+      border-radius: 50%;
+      background: conic-gradient(black 0%, black 100%);
+    }
+    #pomTimerDisplay {
+      position: absolute;
+      width: 100%; height: 100%;
+      top: 0; left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+    }
+
+    /* ——— ANALYTICS ——— */
+    #analyticsOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 3500;
+    }
+    .analytics-modal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 8px;
+      z-index: 4000;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+    body.dark .analytics-modal {
+      background: #333;
+      color: #e0e0e0;
+    }
+    .analytics-modal h2 { margin-top: 0; }
+    .chart-nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .chart-nav button { margin: 0 10px; }
     .chart-label { font-weight:bold; margin: 0 8px; }
     .chart-container { width:100%; margin:20px 0; }
   </style>
 </head>
 <body>
+  <!-- TITLE + DYNAMIC BADGES -->
   <div id="title-container">
     <div id="badgeLeft" class="title-badge"></div>
     <h1 style="margin:0 10px;">Daily Task Tracker v1.2</h1>
     <div id="badgeRight" class="title-badge"></div>
   </div>
 
+  <!-- COUNTERS -->
   <p class="counter">Date: <span id="currentDate"></span></p>
   <p class="counter">Daily Tasks Left: <span id="tasksLeft"></span></p>
   <p class="counter">Daily Tasks Completed: <span id="tasksDone"></span></p>
@@ -58,6 +252,7 @@
   <p class="counter">Current Streak: <span id="streak"></span> days</p>
   <p class="counter">Longest Streak: <span id="longestStreak"></span> days</p>
 
+  <!-- MAIN CONTROLS -->
   <button onclick="completeTask()">Complete Task</button>
   <button onclick="resetDay()">Reset Day</button>
   <button onclick="advanceDay(-1)">-1 Day</button>
@@ -69,8 +264,10 @@
   <button onclick="togglePomodoro()">Pomodoro</button>
   <button onclick="toggleAnalytics()">Analytics</button>
 
+  <!-- CALENDAR -->
   <div class="calendar" id="calendar"></div>
 
+  <!-- SETTINGS MENU -->
   <div id="menuOverlay" onclick="toggleMenu(false)"></div>
   <div id="settingsMenu">
     <select id="selectLeftBadge"></select>
@@ -86,6 +283,7 @@
     <button onclick="toggleMenu(false)">Close</button>
   </div>
 
+  <!-- BADGE MODAL -->
   <div id="badgeModal">
     <h2>Achievements</h2>
     <div id="badgeGrid"></div>
@@ -93,6 +291,7 @@
   </div>
   <div id="badgePopup"></div>
 
+  <!-- POMODORO MODAL -->
   <div id="pomodoroOverlay" onclick="togglePomodoro(false)"></div>
   <div id="pomodoroModal" class="pom-modal">
     <h2>Pomodoro Timer</h2>
@@ -103,6 +302,7 @@
     <button onclick="togglePomodoro(false)">Close</button>
   </div>
 
+  <!-- ANALYTICS MODAL -->
   <div id="analyticsOverlay" onclick="toggleAnalytics(false)"></div>
   <div id="analyticsModal" class="analytics-modal">
     <h2>Weekly • Monthly • Year Analytics</h2>
@@ -112,29 +312,33 @@
       <span id="weeklyLabel" class="chart-label"></span>
       <button onclick="changeWeek(1)">&rarr;</button>
     </div>
-    <div class="chart-container"><canvas id="weeklyChart"></canvas></div>
+    <div class="chart-container">
+      <canvas id="weeklyChart"></canvas>
+    </div>
 
     <div class="chart-nav">
       <button onclick="changeMonth(-1)">&larr;</button>
       <span id="monthlyLabel" class="chart-label"></span>
       <button onclick="changeMonth(1)">&rarr;</button>
     </div>
-    <div class="chart-container"><canvas id="monthlyChart"></canvas></div>
+    <div class="chart-container">
+      <canvas id="monthlyChart"></canvas>
+    </div>
 
     <div class="chart-nav">
       <button onclick="changeYear(-1)">&larr;</button>
       <span id="yearLabel" class="chart-label"></span>
       <button onclick="changeYear(1)">&rarr;</button>
     </div>
-    <div class="chart-container"><canvas id="yearChart"></canvas></div>
+    <div class="chart-container">
+      <canvas id="yearChart"></canvas>
+    </div>
 
     <button onclick="toggleAnalytics(false)">Close</button>
   </div>
 
-  <!-- Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
-    // ——— Helpers ———
+    // ——— HELPERS ———
     function parseDate(str) {
       const [y,m,d] = str.split('-').map(Number);
       return new Date(y, m-1, d);
@@ -145,16 +349,16 @@
             da = String(dt.getDate()).padStart(2,'0');
       return `${y}-${mo}-${da}`;
     }
-    function addDays(dt,n) {
+    function addDays(dt, n) {
       const r = new Date(dt);
-      r.setDate(r.getDate()+n);
+      r.setDate(r.getDate() + n);
       return r;
     }
     const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
     // ——— CORE STATE & STORAGE ———
     const defaultTasks = 3;
-    let today = formatDate(new Date());
+    let today         = formatDate(new Date());
     let tasksLeft      = parseInt(localStorage.getItem("tasksLeft"))      || defaultTasks;
     let tasksDone      = parseInt(localStorage.getItem("tasksDone"))      || 0;
     let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
@@ -163,13 +367,14 @@
     const taskLog      = JSON.parse(localStorage.getItem("taskLog")   || "{}");
     let savedDate      = localStorage.getItem("taskDate");
 
+    // On new day, reset tasks and clear streak‐count flag
     if (savedDate !== today) {
       tasksDone = 0;
       tasksLeft = defaultTasks;
       localStorage.setItem("tasksDone", tasksDone);
       localStorage.setItem("tasksLeft", tasksLeft);
       localStorage.setItem("taskDate", today);
-      localStorage.removeItem("streakLastCounted"); // clear flag on new day
+      localStorage.removeItem("streakLastCounted");
     }
 
     // ——— BADGES INIT ———
@@ -183,15 +388,19 @@
       localStorage.setItem("badges", JSON.stringify(badges));
     }
 
-    // ——— STREAK CALCULATIONS (updated) ———
+    // ——— STREAK LOGIC ———
     function calculateLongestStreak() {
-      const doneDates = Object.keys(taskLog).filter(d=>taskLog[d]>=defaultTasks).sort();
-      let maxS=0, temp=0, prev=null;
-      doneDates.forEach(iso=>{
+      const doneDates = Object.keys(taskLog)
+        .filter(d => taskLog[d] >= defaultTasks)
+        .sort();
+      let maxS = 0, temp = 0, prev = null;
+      doneDates.forEach(iso => {
         if (prev) {
-          const diff = Math.round((new Date(iso)-new Date(prev))/86400000);
-          temp = (diff===1 ? temp+1 : 1);
-        } else temp=1;
+          const diff = Math.round((new Date(iso) - new Date(prev)) / 86400000);
+          temp = (diff === 1 ? temp + 1 : 1);
+        } else {
+          temp = 1;
+        }
         maxS = Math.max(maxS, temp);
         prev = iso;
       });
@@ -199,187 +408,264 @@
     }
 
     function updateStreakFromCalendar() {
-      // look at yesterday to know if we reset
+      // 1) Check yesterday
       const y = parseDate(today);
       y.setDate(y.getDate() - 1);
       const prevKey  = formatDate(y);
       const prevDone = (taskLog[prevKey] || 0) >= defaultTasks;
 
-      // if you didn’t hit yesterday’s goal, drop the streak
+      // 2) Reset if missed yesterday
       if (!prevDone) streak = 0;
 
-      // how many you’ve done today
-      const countToday = (taskLog[today] || 0);
+      // 3) Count tasks done today
+      const countToday = taskLog[today] || 0;
 
-      // only when you hit exactly the threshold (3 tasks) and
-      // only if you haven’t already counted today
-      if (countToday === defaultTasks && localStorage.getItem("streakLastCounted") !== today) {
+      // 4) Only bump when hitting exactly defaultTasks, once
+      if (
+        countToday === defaultTasks &&
+        localStorage.getItem("streakLastCounted") !== today
+      ) {
         streak++;
         localStorage.setItem("streakLastCounted", today);
       }
 
-      // recompute longest streak from calendar
+      // 5) Recompute longest streak
       longestStreak = calculateLongestStreak();
 
-      // persist
+      // 6) Persist
       localStorage.setItem("streak", streak);
       localStorage.setItem("longestStreak", longestStreak);
     }
 
-    // ——— BADGE LOGIC ———
-    function checkBadges(){
-      let updated=false;
-      badges.forEach(b=>{
+    // ——— BADGES ———
+    function checkBadges() {
+      let updated = false;
+      badges.forEach(b => {
         if (!b.unlocked) {
-          if (b.id==="badge_first"    && totalTasksDone>=1) { b.unlocked=true; showBadgePopup(b.name); updated=true; }
-          else if(b.id==="badge_five" && totalTasksDone>=5) { b.unlocked=true; showBadgePopup(b.name); updated=true; }
-          else if(b.id==="badge_streak3"&&streak>=3)        { b.unlocked=true; showBadgePopup(b.name); updated=true; }
+          if (b.id === "badge_first" && totalTasksDone >= 1) {
+            b.unlocked = true; showBadgePopup(b.name); updated = true;
+          }
+          else if (b.id === "badge_five" && totalTasksDone >= 5) {
+            b.unlocked = true; showBadgePopup(b.name); updated = true;
+          }
+          else if (b.id === "badge_streak3" && streak >= 3) {
+            b.unlocked = true; showBadgePopup(b.name); updated = true;
+          }
         }
       });
-      if (updated) localStorage.setItem("badges", JSON.stringify(badges));
+      if (updated) {
+        localStorage.setItem("badges", JSON.stringify(badges));
+      }
     }
-    function initializeBadges(){
-      const grid=document.getElementById("badgeGrid");
-      grid.innerHTML="";
-      badges.forEach(b=>{
-        const div=document.createElement("div");
-        div.style.opacity=b.unlocked?"1":"0.3";
-        div.style.cursor="pointer";
-        div.innerHTML=`<div style="font-size:2em;">🏅</div><div style="font-size:0.8em;">${b.name}</div>`;
-        div.onclick=()=>alert(b.unlocked?b.description:`Locked: ${b.description}`);
+    function initializeBadges() {
+      const grid = document.getElementById("badgeGrid");
+      grid.innerHTML = "";
+      badges.forEach(b => {
+        const div = document.createElement("div");
+        div.style.opacity = b.unlocked ? "1" : "0.3";
+        div.style.cursor = "pointer";
+        div.innerHTML = `
+          <div style="font-size:2em;">🏅</div>
+          <div style="font-size:0.8em;">${b.name}</div>
+        `;
+        div.onclick = () => alert(b.unlocked ? b.description : `Locked: ${b.description}`);
         grid.appendChild(div);
       });
     }
 
     // ——— DRAW CALENDAR ———
-    function drawCalendar(){
-      const cal=document.getElementById("calendar");
-      cal.innerHTML="";
-      const ref=parseDate(today),Y=ref.getFullYear(),M=ref.getMonth();
-      const firstDay=new Date(Y,M,1).getDay();
-      for(let i=0;i<firstDay;i++){
-        const e=document.createElement("div");
-        e.className="day"; e.style.visibility="hidden";
+    function drawCalendar() {
+      const cal = document.getElementById("calendar");
+      cal.innerHTML = "";
+      const ref = parseDate(today);
+      const Y = ref.getFullYear(), M = ref.getMonth();
+      const firstDay = new Date(Y, M, 1).getDay();
+      // empty slots to align Sunday-first
+      for (let i = 0; i < firstDay; i++) {
+        const e = document.createElement("div");
+        e.className = "day";
+        e.style.visibility = "hidden";
         cal.appendChild(e);
       }
-      const dim=new Date(Y,M+1,0).getDate();
-      for(let d=1;d<=dim;d++){
-        const key=formatDate(new Date(Y,M,d)), v=taskLog[key]||0;
-        const box=document.createElement("div");
-        box.className="day "+(v===0?"white":v===1?"red":v===2?"blue":"black");
-        box.textContent=d;
+      const dim = new Date(Y, M+1, 0).getDate();
+      for (let d=1; d<=dim; d++) {
+        const key = formatDate(new Date(Y, M, d));
+        const v   = taskLog[key] || 0;
+        const box = document.createElement("div");
+        box.className = "day " + (
+          v===0 ? "white" :
+          v===1 ? "red" :
+          v===2 ? "blue" : "black"
+        );
+        box.textContent = d;
         cal.appendChild(box);
       }
     }
 
     // ——— TITLE BADGES ———
-    function updateTitleBadges(){
-      const leftId=localStorage.getItem("titleBadgeLeft"),
-            rightId=localStorage.getItem("titleBadgeRight"),
-            map=Object.fromEntries(badges.map(b=>[b.id,b])),
-            leftEl=document.getElementById("badgeLeft"),
-            rightEl=document.getElementById("badgeRight");
-      if(map[leftId]) leftEl.textContent="🏅", leftEl.title=map[leftId].name;
-      else leftEl.textContent="";
-      if(map[rightId]) rightEl.textContent="🏅", rightEl.title=map[rightId].name;
-      else rightEl.textContent="";
+    function updateTitleBadges() {
+      const leftId  = localStorage.getItem("titleBadgeLeft"),
+            rightId = localStorage.getItem("titleBadgeRight"),
+            map     = Object.fromEntries(badges.map(b => [b.id, b])),
+            leftEl  = document.getElementById("badgeLeft"),
+            rightEl = document.getElementById("badgeRight");
+      if (map[leftId]) {
+        leftEl.textContent = "🏅";
+        leftEl.title = map[leftId].name;
+      } else {
+        leftEl.textContent = "";
+      }
+      if (map[rightId]) {
+        rightEl.textContent = "🏅";
+        rightEl.title = map[rightId].name;
+      } else {
+        rightEl.textContent = "";
+      }
     }
-    function initTitleBadgeSelectors(){
-      const selL=document.getElementById("selectLeftBadge"),
-            selR=document.getElementById("selectRightBadge");
-      badges.forEach(b=>{
-        const o1=document.createElement("option");
-        o1.value=b.id; o1.textContent=b.name; selL.appendChild(o1);
+    function initTitleBadgeSelectors() {
+      const selL = document.getElementById("selectLeftBadge"),
+            selR = document.getElementById("selectRightBadge");
+      badges.forEach(b => {
+        const o1 = document.createElement("option");
+        o1.value = b.id;
+        o1.textContent = b.name;
+        selL.appendChild(o1);
         selR.appendChild(o1.cloneNode(true));
       });
-      selL.value=localStorage.getItem("titleBadgeLeft")||badges[0].id;
-      selR.value=localStorage.getItem("titleBadgeRight")||badges[1].id;
-      selL.onchange=e=>{localStorage.setItem("titleBadgeLeft",e.target.value);updateTitleBadges()};
-      selR.onchange=e=>{localStorage.setItem("titleBadgeRight",e.target.value);updateTitleBadges()};
+      selL.value = localStorage.getItem("titleBadgeLeft") || badges[0].id;
+      selR.value = localStorage.getItem("titleBadgeRight") || badges[1].id;
+      selL.onchange = e => {
+        localStorage.setItem("titleBadgeLeft", e.target.value);
+        updateTitleBadges();
+      };
+      selR.onchange = e => {
+        localStorage.setItem("titleBadgeRight", e.target.value);
+        updateTitleBadges();
+      };
     }
 
-    // ——— UPDATE DISPLAY ———
-    function updateDisplays(){
-      document.getElementById("currentDate").textContent=today;
-      document.getElementById("tasksLeft").textContent=tasksLeft;
-      document.getElementById("tasksDone").textContent=tasksDone;
-      document.getElementById("totalTasksDone").textContent=totalTasksDone;
+    // ——— UPDATE ALL DISPLAYS ———
+    function updateDisplays() {
+      document.getElementById("currentDate").textContent = today;
+      document.getElementById("tasksLeft").textContent   = tasksLeft;
+      document.getElementById("tasksDone").textContent   = tasksDone;
+      document.getElementById("totalTasksDone").textContent = totalTasksDone;
       updateStreakFromCalendar();
-      document.getElementById("streak").textContent=streak;
-      document.getElementById("longestStreak").textContent=longestStreak;
+      document.getElementById("streak").textContent      = streak;
+      document.getElementById("longestStreak").textContent = longestStreak;
       drawCalendar();
       checkBadges();
       initializeBadges();
       updateTitleBadges();
     }
 
-    // ——— TASKS + CONFETTI + GLOW ———
-    function completeTask(){
-      if(tasksLeft>0) tasksLeft--;
+    // ——— TASK & CONFETTI & GLOW ———
+    function completeTask() {
+      if (tasksLeft > 0) tasksLeft--;
       tasksDone++; totalTasksDone++;
-      taskLog[today]=tasksDone;
-      localStorage.setItem("tasksLeft",tasksLeft);
-      localStorage.setItem("tasksDone",tasksDone);
-      localStorage.setItem("totalTasksDone",totalTasksDone);
-      localStorage.setItem("taskLog",JSON.stringify(taskLog));
-      const prevStr=streak, prevLong=longestStreak;
+      taskLog[today] = tasksDone;
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("totalTasksDone", totalTasksDone);
+      localStorage.setItem("taskLog", JSON.stringify(taskLog));
+
+      const prevStr = streak, prevLong = longestStreak;
       updateDisplays();
-      if(streak>prevStr){
-        const el=document.getElementById("streak");
+
+      // Glow on streak change
+      if (streak > prevStr) {
+        const el = document.getElementById("streak");
         el.classList.add("streak-boost");
-        setTimeout(()=>el.classList.remove("streak-boost"),800);
+        setTimeout(() => el.classList.remove("streak-boost"), 800);
       }
-      if(longestStreak>prevLong){
-        const elL=document.getElementById("longestStreak");
+      if (longestStreak > prevLong) {
+        const elL = document.getElementById("longestStreak");
         elL.classList.add("streak-boost");
-        setTimeout(()=>elL.classList.remove("streak-boost"),800);
+        setTimeout(() => elL.classList.remove("streak-boost"), 800);
       }
-      if(tasksDone>=defaultTasks){
-        confetti({particleCount:100,spread:60,origin:{y:0.6},colors:['#000000','#FFA500']});
+
+      // Confetti once you reach the daily goal
+      if (tasksDone >= defaultTasks) {
+        confetti({
+          particleCount: 100,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#000000','#FFA500']
+        });
       }
     }
-    function resetDay(){
-      tasksDone=0; tasksLeft=defaultTasks;
+
+    function resetDay() {
+      tasksDone = 0;
+      tasksLeft = defaultTasks;
       delete taskLog[today];
-      localStorage.setItem("tasksLeft",tasksLeft);
-      localStorage.setItem("tasksDone",tasksDone);
-      localStorage.setItem("taskLog",JSON.stringify(taskLog));
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("taskLog", JSON.stringify(taskLog));
       updateDisplays();
     }
-    function resetTotalTasks(){
-      totalTasksDone=0;localStorage.setItem("totalTasksDone",0);
-      badges.forEach(b=>{ if(b.id==="badge_first"||b.id==="badge_five") b.unlocked=false; });
-      localStorage.setItem("badges",JSON.stringify(badges));
-      updateDisplays();alert("Total tasks and relevant badges reset.");
+
+    function resetTotalTasks() {
+      totalTasksDone = 0;
+      localStorage.setItem("totalTasksDone", 0);
+      // reset only total-based badges
+      badges.forEach(b => {
+        if (b.id === "badge_first" || b.id === "badge_five") {
+          b.unlocked = false;
+        }
+      });
+      localStorage.setItem("badges", JSON.stringify(badges));
+      updateDisplays();
+      alert("Total tasks completed and relevant badges have been reset.");
     }
-    function resetBadges(){
-      badges.forEach(b=>b.unlocked=false);
-      localStorage.setItem("badges",JSON.stringify(badges));
+
+    function resetBadges() {
+      badges.forEach(b => b.unlocked = false);
+      localStorage.setItem("badges", JSON.stringify(badges));
       initializeBadges();
     }
-    function advanceDay(offset){
-      const d=addDays(parseDate(today),offset);
-      today=formatDate(d);
-      if(today!==localStorage.getItem("taskDate")){
-        tasksDone=0; tasksLeft=defaultTasks;
-        localStorage.setItem("tasksDone",tasksDone);
-        localStorage.setItem("tasksLeft",tasksLeft);
-        localStorage.setItem("taskDate",today);
+
+    function advanceDay(offset) {
+      const d = addDays(parseDate(today), offset);
+      today = formatDate(d);
+      if (today !== localStorage.getItem("taskDate")) {
+        tasksDone = 0;
+        tasksLeft = defaultTasks;
+        localStorage.setItem("tasksDone", tasksDone);
+        localStorage.setItem("tasksLeft", tasksLeft);
+        localStorage.setItem("taskDate", today);
+        // clear streak‐count flag when manually moving days
         localStorage.removeItem("streakLastCounted");
       }
       updateDisplays();
     }
-    function exportTrackerData(){
-      const data={tasksLeft,tasksDone,totalTasksDone,streak,longestStreak,taskLog,badges};
-      const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-      const url=URL.createObjectURL(blob),a=document.createElement("a");
-      a.href=url; a.download=`backup-${today}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+    function exportTrackerData() {
+      const data = {
+        tasksLeft,
+        tasksDone,
+        totalTasksDone,
+        streak,
+        longestStreak,
+        taskLog,
+        badges
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href = url;
+      a.download = `backup-${today}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
-    function importTrackerData(evt){
-      const file=evt.target.files[0]; if(!file) return;
-      const reader=new FileReader();
-      reader.onload=e=>{
-        const data=JSON.parse(e.target.result);
+
+    function importTrackerData(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const data = JSON.parse(e.target.result);
         tasksLeft      = data.tasksLeft      || tasksLeft;
         tasksDone      = data.tasksDone      || tasksDone;
         totalTasksDone = data.totalTasksDone || totalTasksDone;
@@ -387,99 +673,288 @@
         longestStreak  = data.longestStreak  || longestStreak;
         Object.assign(taskLog, data.taskLog);
         badges = data.badges || badges;
-        localStorage.setItem("tasksLeft",      tasksLeft);
-        localStorage.setItem("tasksDone",      tasksDone);
+        localStorage.setItem("tasksLeft", tasksLeft);
+        localStorage.setItem("tasksDone", tasksDone);
         localStorage.setItem("totalTasksDone", totalTasksDone);
-        localStorage.setItem("streak",         streak);
-        localStorage.setItem("longestStreak",  longestStreak);
-        localStorage.setItem("taskLog",        JSON.stringify(taskLog));
-        localStorage.setItem("badges",         JSON.stringify(badges));
-        localStorage.setItem("taskDate",       today);
+        localStorage.setItem("streak", streak);
+        localStorage.setItem("longestStreak", longestStreak);
+        localStorage.setItem("taskLog", JSON.stringify(taskLog));
+        localStorage.setItem("badges", JSON.stringify(badges));
+        localStorage.setItem("taskDate", today);
         localStorage.removeItem("streakLastCounted");
-        updateDisplays(); alert("✅ Imported successfully");
+        updateDisplays();
+        alert("✅ Imported successfully");
       };
       reader.readAsText(file);
     }
-    function showBadgePopup(name){
-      const p=document.getElementById("badgePopup");
-      p.textContent=`🏆 Badge Unlocked: ${name}!`;
-      p.style.display="block";
-      setTimeout(()=>p.style.display="none",3000);
+
+    function showBadgePopup(name) {
+      const p = document.getElementById("badgePopup");
+      p.textContent = `🏆 Badge Unlocked: ${name}!`;
+      p.style.display = "block";
+      setTimeout(() => p.style.display = "none", 3000);
     }
 
-    // ——— TOGGLES ———
-    function toggleDarkMode(){
-      const d=document.body.classList.toggle("dark");
+    // ——— TOGGLERS ———
+    function toggleDarkMode() {
+      const d = document.body.classList.toggle("dark");
       localStorage.setItem("darkMode", d);
     }
-    function toggleMenu(show=null){
-      const ov=document.getElementById("menuOverlay"), sm=document.getElementById("settingsMenu");
-      const open = show===null ? (sm.style.display!=="block") : show;
-      ov.style.display = open ? "block" : "none";
-      sm.style.display = open ? "block" : "none";
+
+    function toggleMenu(show = null) {
+      const ov = document.getElementById("menuOverlay"),
+            sm = document.getElementById("settingsMenu"),
+            isVisible = sm.style.display === "block",
+            shouldShow = show === null ? !isVisible : show;
+      ov.style.display = shouldShow ? "block" : "none";
+      sm.style.display = shouldShow ? "block" : "none";
     }
-    function toggleBadgeModal(show=null){
-      const m=document.getElementById("badgeModal");
-      const open = show===null ? (m.style.display!=="block") : show;
-      m.style.display = open ? "block" : "none";
+
+    function toggleBadgeModal(show = null) {
+      const m = document.getElementById("badgeModal"),
+            isVisible = m.style.display === "block",
+            shouldShow = show === null ? !isVisible : show;
+      m.style.display = shouldShow ? "block" : "none";
     }
 
     // ——— BROWN NOISE ———
-    const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     let noiseSource;
-    function startBrownNoise(){
-      const bufSize=4096;
-      noiseSource=audioCtx.createScriptProcessor(bufSize,1,1);
-      let lastOut=0;
-      noiseSource.onaudioprocess=e=>{
-        const out=e.outputBuffer.getChannelData(0);
-        for(let i=0;i<bufSize;i++){
-          const white=Math.random()*2-1;
-          lastOut=(lastOut+0.02*white)/1.02;
-          out[i]=lastOut*3.5;
+    function startBrownNoise() {
+      const bufSize = 4096;
+      noiseSource = audioCtx.createScriptProcessor(bufSize, 1, 1);
+      let lastOut = 0;
+      noiseSource.onaudioprocess = e => {
+        const out = e.outputBuffer.getChannelData(0);
+        for (let i=0; i<bufSize; i++) {
+          const white = Math.random()*2 - 1;
+          lastOut = (lastOut + 0.02*white)/1.02;
+          out[i] = lastOut * 3.5;
         }
       };
       noiseSource.connect(audioCtx.destination);
     }
-    function stopAllNoise(){
-      if(noiseSource){noiseSource.disconnect();if(noiseSource.stop)noiseSource.stop();noiseSource=null;}
+    function stopAllNoise() {
+      if (noiseSource) {
+        noiseSource.disconnect();
+        if (noiseSource.stop) noiseSource.stop();
+        noiseSource = null;
+      }
     }
-    function playTone(duration=0.2){
-      const osc=audioCtx.createOscillator();
-      osc.type='sine'; osc.frequency.value=440;
+    function playTone(duration = 0.2) {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = 440;
       osc.connect(audioCtx.destination);
       osc.start();
-      osc.stop(audioCtx.currentTime+duration);
+      osc.stop(audioCtx.currentTime + duration);
     }
 
     // ——— POMODORO ———
-    let pomInterval=null, pomPhase='work', pomTime=25*60, pomRunning=false;
-    function updatePomTimerDisplay(){ /* unchanged */ }
-    function updateProgressRing(){ /* unchanged */ }
-    function tickPom(){ /* unchanged */ }
-    function startWorkPhase(){ /* unchanged */ }
-    function startBreakPhase(){ /* unchanged */ }
-    function togglePomodoro(show=null){ /* unchanged */ }
+    let pomInterval = null,
+        pomPhase    = 'work',
+        pomTime     = 25 * 60,
+        pomRunning  = false;
+
+    function updatePomTimerDisplay() {
+      const m = String(Math.floor(pomTime/60)).padStart(2,'0');
+      const s = String(pomTime%60).padStart(2,'0');
+      document.getElementById('pomTimerDisplay').textContent = `${m}:${s}`;
+    }
+
+    function updateProgressRing() {
+      const total = (pomPhase === 'work'?25*60:5*60);
+      const pct   = ((total - pomTime)/total)*100;
+      document.getElementById('pomProgressContainer').style.background =
+        `conic-gradient(orange ${pct}%, black ${pct}% 100%)`;
+    }
+
+    function tickPom() {
+      pomTime--;
+      updatePomTimerDisplay();
+      updateProgressRing();
+      if (pomTime <= 0) {
+        clearInterval(pomInterval);
+        if (pomPhase === 'work') {
+          stopAllNoise();
+          playTone(0.5);
+          startBreakPhase();
+        } else {
+          playTone(0.5);
+          pomRunning = false;
+          document.getElementById('pomStartBtn').textContent = 'Start Pomodoro';
+        }
+      }
+    }
+
+    function startWorkPhase() {
+      pomPhase = 'work';
+      pomTime  = 25 * 60;
+      updatePomTimerDisplay();
+      updateProgressRing();
+      playTone(0.2);
+      startBrownNoise();
+      pomInterval = setInterval(tickPom, 1000);
+    }
+
+    function startBreakPhase() {
+      pomPhase = 'break';
+      pomTime  = 5 * 60;
+      updatePomTimerDisplay();
+      updateProgressRing();
+      playTone(0.2);
+      pomInterval = setInterval(tickPom, 1000);
+    }
+
+    function togglePomodoro(show = null) {
+      const modal = document.getElementById('pomodoroModal'),
+            ov    = document.getElementById('pomodoroOverlay'),
+            isVis = modal.style.display === 'block',
+            should= show === null ? !isVis : show;
+      modal.style.display = should ? 'block' : 'none';
+      ov.style.display    = should ? 'block' : 'none';
+      if (!should && pomRunning) {
+        clearInterval(pomInterval);
+        stopAllNoise();
+        pomRunning = false;
+        document.getElementById('pomStartBtn').textContent = 'Start Pomodoro';
+        pomPhase = 'work';
+        pomTime  = 25 * 60;
+        updatePomTimerDisplay();
+        updateProgressRing();
+      }
+    }
 
     // ——— ANALYTICS ———
     let weeklyChart, monthlyChart, yearChart;
-    let weekOffset=0, monthOffset=0, yearOffset=0;
-    function changeWeek(delta){ weekOffset+=delta; renderAnalytics(); }
-    function changeMonth(delta){ monthOffset+=delta; renderAnalytics(); }
-    function changeYear(delta){ yearOffset+=delta; renderAnalytics(); }
-    function renderAnalytics(){ /* unchanged */ }
-    function toggleAnalytics(show=null){ /* unchanged */ }
+    let weekOffset = 0, monthOffset = 0, yearOffset = 0;
 
-    // ——— INIT ———
-    document.getElementById('importInput').addEventListener('change',importTrackerData);
-    document.getElementById('pomStartBtn').addEventListener('click',()=>{
-      if(!pomRunning){ pomRunning=true; document.getElementById('pomStartBtn').textContent='Running'; startWorkPhase(); }
+    function changeWeek(delta) {
+      weekOffset += delta;
+      renderAnalytics();
+    }
+    function changeMonth(delta) {
+      monthOffset += delta;
+      renderAnalytics();
+    }
+    function changeYear(delta) {
+      yearOffset += delta;
+      renderAnalytics();
+    }
+
+    function renderAnalytics() {
+      const ref = parseDate(today);
+
+      // Weekly (Sun→Sat)
+      const refWeek = addDays(ref, weekOffset * 7);
+      const startSun = addDays(refWeek, -refWeek.getDay());
+      const labels7 = [], data7 = [];
+      for (let i=0; i<7; i++) {
+        const d = addDays(startSun, i);
+        labels7.push(`${weekdays[d.getDay()]} ${d.getMonth()+1}/${d.getDate()}`);
+        data7.push(taskLog[formatDate(d)] || 0);
+      }
+      document.getElementById('weeklyLabel').textContent =
+        `Week of ${startSun.getMonth()+1}/${startSun.getDate()}`;
+
+      // Monthly (1→N)
+      const refMon = new Date(ref.getFullYear(), ref.getMonth()+monthOffset, 1);
+      const Y = refMon.getFullYear(), M = refMon.getMonth();
+      const dim = new Date(Y, M+1, 0).getDate();
+      const labelsM = [], dataM = [];
+      for (let d=1; d<=dim; d++) {
+        labelsM.push(String(d));
+        dataM.push(taskLog[formatDate(new Date(Y, M, d))] || 0);
+      }
+      document.getElementById('monthlyLabel').textContent =
+        refMon.toLocaleDateString(undefined, { month:'long', year:'numeric' });
+
+      // Yearly (Jan→Dec)
+      const refYear = new Date(ref.getFullYear() + yearOffset, 0, 1);
+      const labelsY = [], dataY = [];
+      for (let m=0; m<12; m++) {
+        const d = new Date(refYear.getFullYear(), m, 1);
+        labelsY.push(d.toLocaleDateString(undefined, { month:'short' }));
+        let sum = 0;
+        Object.entries(taskLog).forEach(([k,v]) => {
+          const dt = parseDate(k);
+          if (dt.getFullYear() === refYear.getFullYear() && dt.getMonth() === m) {
+            sum += v;
+          }
+        });
+        dataY.push(sum);
+      }
+      document.getElementById('yearLabel').textContent = refYear.getFullYear();
+
+      // Render/update weekly chart
+      const wCtx = document.getElementById('weeklyChart').getContext('2d');
+      if (weeklyChart) {
+        weeklyChart.data.labels = labels7;
+        weeklyChart.data.datasets[0].data = data7;
+        weeklyChart.update();
+      } else {
+        weeklyChart = new Chart(wCtx, {
+          type:'bar',
+          data:{ labels:labels7, datasets:[{ label:'Tasks Completed', data:data7, backgroundColor:'orange'}] },
+          options:{ responsive:true, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        });
+      }
+
+      // Monthly chart
+      const mCtx = document.getElementById('monthlyChart').getContext('2d');
+      if (monthlyChart) {
+        monthlyChart.data.labels = labelsM;
+        monthlyChart.data.datasets[0].data = dataM;
+        monthlyChart.update();
+      } else {
+        monthlyChart = new Chart(mCtx, {
+          type:'bar',
+          data:{ labels:labelsM, datasets:[{ label:'Tasks Completed', data:dataM, backgroundColor:'orange'}] },
+          options:{ responsive:true, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        });
+      }
+
+      // Yearly chart
+      const yCtx = document.getElementById('yearChart').getContext('2d');
+      if (yearChart) {
+        yearChart.data.labels = labelsY;
+        yearChart.data.datasets[0].data = dataY;
+        yearChart.update();
+      } else {
+        yearChart = new Chart(yCtx, {
+          type:'bar',
+          data:{ labels:labelsY, datasets:[{ label:'Tasks Completed', data:dataY, backgroundColor:'orange'}] },
+          options:{ responsive:true, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        });
+      }
+    }
+
+    function toggleAnalytics(show = null) {
+      const modal = document.getElementById('analyticsModal'),
+            ov    = document.getElementById('analyticsOverlay'),
+            isVis = modal.style.display === 'block',
+            should= show === null ? !isVis : show;
+      if (should) renderAnalytics();
+      modal.style.display = should ? 'block' : 'none';
+      ov.style.display    = should ? 'block' : 'none';
+    }
+
+    // ——— INITIALIZATION ———
+    document.getElementById('importInput').addEventListener('change', importTrackerData);
+    document.getElementById('pomStartBtn').addEventListener('click', () => {
+      if (!pomRunning) {
+        pomRunning = true;
+        document.getElementById('pomStartBtn').textContent = 'Running';
+        startWorkPhase();
+      }
     });
-    document.addEventListener('keydown',e=>{
-      if(e.key.toLowerCase()==='d') toggleDarkMode();
-      if(e.key.toLowerCase()==='m') toggleMenu();
+    document.addEventListener('keydown', e => {
+      if (e.key.toLowerCase() === 'd') toggleDarkMode();
+      if (e.key.toLowerCase() === 'm') toggleMenu();
     });
-    if(localStorage.getItem('darkMode')==='true') document.body.classList.add('dark');
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark');
+    }
 
     initTitleBadgeSelectors();
     updateDisplays();
