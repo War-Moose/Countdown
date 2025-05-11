@@ -13,7 +13,7 @@
     .counter { font-size:1.2em; margin:5px }
     button { font-size:1.2em; padding:10px 20px; margin:10px; cursor:pointer; }
     .calendar { display:grid; grid-template-columns:repeat(7,40px); gap:4px; justify-content:center; margin-top:20px; }
-    .day { width:40px; height:40px; border:1px solid #999; display:flex; align-items:center; justify-content:center; font-size:0.8em; }
+    .day { width:40px;height:40px;border:1px solid #999; display:flex;align-items:center;justify-content:center; font-size:0.8em; }
     .day.white{background:white;color:black}.day.red{background:red;color:white}.day.blue{background:blue;color:white}.day.black{background:black;color:white}
     #title-container { display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
     .title-badge { width:40px;height:40px; display:flex;align-items:center;justify-content:center;font-size:1.5em;cursor:pointer; }
@@ -35,12 +35,7 @@
 
     /* ====== Analytics Styles ====== */
     #analyticsOverlay { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:3500; }
-    .analytics-modal {
-      display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-      background:#fff; color:#000; padding:20px; border-radius:8px; z-index:4000;
-      box-shadow:0 0 10px rgba(0,0,0,0.5); width:90%; max-width:600px; text-align:center;
-      overflow-y:auto; max-height:90vh;
-    }
+    .analytics-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; color:#000; padding:20px; border-radius:8px; z-index:4000; box-shadow:0 0 10px rgba(0,0,0,0.5); width:90%; max-width:600px; text-align:center; overflow-y:auto; max-height:90vh; }
     body.dark .analytics-modal { background:#333; color:#e0e0e0; }
     .analytics-modal h2 { margin-top:0; }
     .chart-container { width:100%; margin:20px 0; }
@@ -73,7 +68,8 @@
   <button onclick="document.getElementById('importInput').click()">Import Backup</button>
   <button onclick="toggleMenu()">Menu</button>
   <button onclick="togglePomodoro()">Pomodoro</button>
-  <button onclick="openAnalytics()">Analytics</button>
+  <!-- Changed here: call toggleAnalytics() -->
+  <button onclick="toggleAnalytics()">Analytics</button>
 
   <!-- Calendar -->
   <div class="calendar" id="calendar"></div>
@@ -125,9 +121,9 @@
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
-    // ——— CORE STATE & STORAGE ———
+    // ——— CORE state & storage ———
     const defaultTasks = 3;
-    let today = (new Date()).toISOString().split("T")[0];
+    let today = new Date().toISOString().split("T")[0];
     let tasksLeft      = parseInt(localStorage.getItem("tasksLeft"))      || defaultTasks;
     let tasksDone      = parseInt(localStorage.getItem("tasksDone"))      || 0;
     let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
@@ -144,7 +140,7 @@
       localStorage.setItem("taskDate", today);
     }
 
-    // ——— BADGES INIT ———
+    // ——— BADGES init ———
     let badges = JSON.parse(localStorage.getItem("badges"));
     if (!Array.isArray(badges) || badges.length !== 3) {
       badges = [
@@ -155,34 +151,34 @@
       localStorage.setItem("badges", JSON.stringify(badges));
     }
 
-    // ——— STREAK CALCULATIONS ———
+    // ——— STREAK logic ———
     function calculateLongestStreak() {
       const doneDates = Object.keys(taskLog).filter(d=>taskLog[d]>=defaultTasks).sort();
       let maxS=0,temp=0,prev=null;
-      for (const iso of doneDates) {
+      doneDates.forEach(iso=>{
         if (prev) {
-          const diff = Math.round((new Date(iso)-new Date(prev))/86400000);
-          temp = diff===1? temp+1:1;
+          const diff=(new Date(iso)-new Date(prev))/86400000;
+          temp=(diff===1?temp+1:1);
         } else temp=1;
-        if (temp>maxS) maxS=temp;
+        maxS=Math.max(maxS,temp);
         prev=iso;
-      }
+      });
       return maxS;
     }
     function updateStreakFromCalendar() {
       const y=new Date(today); y.setDate(y.getDate()-1);
-      const prevKey = y.toISOString().split("T")[0];
+      const prevKey=y.toISOString().split("T")[0];
       const prevDone=(taskLog[prevKey]||0)>=defaultTasks;
       const todayDone=(taskLog[today]||0)>=defaultTasks;
       if (!prevDone) streak=0;
       if (todayDone) streak++;
       longestStreak=calculateLongestStreak();
-      localStorage.setItem("streak", streak);
-      localStorage.setItem("longestStreak", longestStreak);
+      localStorage.setItem("streak",streak);
+      localStorage.setItem("longestStreak",longestStreak);
     }
 
-    // ——— BADGE LOGIC ———
-    function checkBadges() {
+    // ——— BADGE logic ———
+    function checkBadges(){
       let updated=false;
       badges.forEach(b=>{
         if (!b.unlocked) {
@@ -191,9 +187,9 @@
           else if (b.id==="badge_streak3"&& streak>=3)       { b.unlocked=true; showBadgePopup(b.name); updated=true; }
         }
       });
-      if (updated) localStorage.setItem("badges", JSON.stringify(badges));
+      if(updated) localStorage.setItem("badges",JSON.stringify(badges));
     }
-    function initializeBadges() {
+    function initializeBadges(){
       const grid=document.getElementById("badgeGrid");
       grid.innerHTML="";
       badges.forEach(b=>{
@@ -206,13 +202,13 @@
       });
     }
 
-    // ——— CALENDAR DRAW ———
-    function drawCalendar() {
+    // ——— CALENDAR draw ———
+    function drawCalendar(){
       const cal=document.getElementById("calendar");
       cal.innerHTML="";
       const c=new Date(today),Y=c.getFullYear(),M=c.getMonth();
       const days=new Date(Y,M+1,0).getDate();
-      for(let d=1; d<=days; d++){
+      for(let d=1;d<=days;d++){
         const key=new Date(Y,M,d).toISOString().split("T")[0];
         const v=taskLog[key]||0;
         const box=document.createElement("div");
@@ -221,8 +217,8 @@
       }
     }
 
-    // ——— TITLE BADGES ———
-    function updateTitleBadges() {
+    // ——— TITLE badges ———
+    function updateTitleBadges(){
       const leftId=localStorage.getItem("titleBadgeLeft"),
             rightId=localStorage.getItem("titleBadgeRight"),
             map=Object.fromEntries(badges.map(b=>[b.id,b])),
@@ -245,7 +241,7 @@
       selR.onchange=e=>{ localStorage.setItem("titleBadgeRight",e.target.value); updateTitleBadges(); };
     }
 
-    // ——— UPDATE DISPLAYS ———
+    // ——— UPDATE all UI ———
     function updateDisplays(){
       document.getElementById("currentDate").textContent=today;
       document.getElementById("tasksLeft").textContent=tasksLeft;
@@ -260,7 +256,7 @@
       updateTitleBadges();
     }
 
-    // ——— TASK FUNCTIONS ———
+    // ——— TASK HANDLERS ———
     function completeTask(){
       if(tasksLeft>0) tasksLeft--;
       tasksDone++; totalTasksDone++;
@@ -320,10 +316,11 @@
       const data={tasksLeft,tasksDone,totalTasksDone,streak,longestStreak,taskLog,badges};
       const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob),a=document.createElement("a");
-      a.href=url;a.download=`backup-${today}.json`;document.body.appendChild(a);a.click();document.body.removeChild(a);
+      a.href=url; a.download=`backup-${today}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
     function importTrackerData(evt){
-      const file=evt.target.files[0]; if(!file)return;
+      const file=evt.target.files[0];
+      if(!file)return;
       const reader=new FileReader();
       reader.onload=e=>{
         const data=JSON.parse(e.target.result);
@@ -353,14 +350,14 @@
       setTimeout(()=>p.style.display="none",3000);
     }
 
-    // ——— TOGGLE FUNCTIONS ———
+    // ——— TOGGLES ———
     function toggleDarkMode(){
       const d=document.body.classList.toggle("dark");
       localStorage.setItem("darkMode",d);
     }
     function toggleMenu(show=null){
       const ov=document.getElementById("menuOverlay"), sm=document.getElementById("settingsMenu"),
-            open = show===null ? (sm.style.display!=="block") : show;
+            open=show===null?(sm.style.display!=="block"):show;
       ov.style.display=open?"block":"none";
       sm.style.display=open?"block":"none";
     }
@@ -370,37 +367,18 @@
       m.style.display=open?"block":"none";
     }
 
-    // ——— NOISE GENERATOR ———
+    // ——— BUILT-IN BROWN NOISE ———
     const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    let noiseSource, noiseFilter;
-    function startWhiteNoise(){
-      const bufSize=2*audioCtx.sampleRate;
-      const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
-      const data=buf.getChannelData(0);
-      for(let i=0;i<bufSize;i++) data[i]=Math.random()*2-1;
-      noiseSource=audioCtx.createBufferSource(); noiseSource.buffer=buf; noiseSource.loop=true;
-      noiseSource.connect(audioCtx.destination);
-      noiseSource.start();
-    }
-    function startFilteredNoise(){
-      const bufSize=2*audioCtx.sampleRate;
-      const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
-      const data=buf.getChannelData(0);
-      for(let i=0;i<bufSize;i++) data[i]=Math.random()*2-1;
-      noiseSource=audioCtx.createBufferSource(); noiseSource.buffer=buf; noiseSource.loop=true;
-      noiseFilter=audioCtx.createBiquadFilter(); noiseFilter.type='lowpass'; noiseFilter.frequency.value=1000;
-      noiseSource.connect(noiseFilter); noiseFilter.connect(audioCtx.destination);
-      noiseSource.start();
-    }
-    function startPinkNoise(){
-      const bufSize=4096;
-      noiseSource=audioCtx.createScriptProcessor(bufSize,1,1);
-      let lastOut=0;
+    let noiseSource;
+    function startBrownNoise(){
+      const bufferSize=4096;
+      noiseSource=audioCtx.createScriptProcessor(bufferSize,1,1);
+      let lastOut=0.0;
       noiseSource.onaudioprocess=e=>{
         const out=e.outputBuffer.getChannelData(0);
-        for(let i=0;i<bufSize;i++){
+        for(let i=0;i<bufferSize;i++){
           const white=Math.random()*2-1;
-          lastOut=(lastOut+(0.02*white))/1.02;
+          lastOut=(lastOut+0.02*white)/1.02;
           out[i]=lastOut*3.5;
         }
       };
@@ -408,7 +386,6 @@
     }
     function stopAllNoise(){
       if(noiseSource){ noiseSource.disconnect(); if(noiseSource.stop) noiseSource.stop(); noiseSource=null; }
-      if(noiseFilter){ noiseFilter.disconnect(); noiseFilter=null; }
     }
     function playTone(duration=0.2){
       const osc=audioCtx.createOscillator(); osc.type='sine'; osc.frequency.value=440;
@@ -444,7 +421,7 @@
     function startWorkPhase(){
       pomPhase='work'; pomTime=25*60;
       updatePomTimerDisplay(); updateProgressRing();
-      playTone(0.2); startFilteredNoise();
+      playTone(0.2); startBrownNoise();
       pomInterval=setInterval(tickPom,1000);
     }
     function startBreakPhase(){
@@ -455,11 +432,11 @@
     }
     function togglePomodoro(show=null){
       const modal=document.getElementById('pomodoroModal'),
-            overlay=document.getElementById('pomodoroOverlay'),
+            ov=document.getElementById('pomodoroOverlay'),
             isVis=modal.style.display==='block',
             should=show===null?!isVis:show;
       modal.style.display=should?'block':'none';
-      overlay.style.display=should?'block':'none';
+      ov.style.display=should?'block':'none';
       if(!should && pomRunning){
         clearInterval(pomInterval); stopAllNoise(); pomRunning=false;
         document.getElementById('pomStartBtn').textContent='Start Pomodoro';
@@ -468,60 +445,58 @@
       }
     }
 
-    // ——— ANALYTICS (weekly & monthly) ———
+    // ——— ANALYTICS ———
     let weeklyChart, monthlyChart;
     function renderAnalytics(){
-      // Weekly: last 7 days
-      const labels7 = [], data7 = [];
+      // Weekly
+      const labels7=[], data7=[];
       for(let i=6;i>=0;i--){
         const d=new Date(); d.setDate(d.getDate()-i);
-        const key=d.toISOString().split("T")[0];
         labels7.push(d.toLocaleDateString(undefined,{weekday:'short'}));
-        data7.push(taskLog[key]||0);
+        data7.push(taskLog[d.toISOString().split("T")[0]]||0);
       }
-      // Monthly: current month days
+      // Monthly
       const now=new Date(), Y=now.getFullYear(), M=now.getMonth();
-      const daysInMonth=new Date(Y,M+1,0).getDate();
+      const dim=new Date(Y,M+1,0).getDate();
       const labelsM=[], dataM=[];
-      for(let d=1;d<=daysInMonth;d++){
+      for(let d=1;d<=dim;d++){
         labelsM.push(String(d));
-        const key=new Date(Y,M,d).toISOString().split("T")[0];
-        dataM.push(taskLog[key]||0);
+        dataM.push(taskLog[new Date(Y,M,d).toISOString().split("T")[0]]||0);
       }
-      // Create/update weekly chart
+      // Weekly Chart
       const wCtx=document.getElementById('weeklyChart').getContext('2d');
-      if(weeklyChart) weeklyChart.data.labels=labels7, weeklyChart.data.datasets[0].data=data7, weeklyChart.update();
-      else weeklyChart=new Chart(wCtx,{
-        type:'bar',
-        data:{
-          labels:labels7,
-          datasets:[{label:'Tasks Completed',data:data7,backgroundColor:'orange'}]
-        },
-        options:{responsive:true,scales:{y:{beginAtZero:true,precision:0}}}
-      });
-      // Create/update monthly chart
+      if(weeklyChart){
+        weeklyChart.data.labels=labels7; weeklyChart.data.datasets[0].data=data7; weeklyChart.update();
+      } else {
+        weeklyChart=new Chart(wCtx,{
+          type:'bar',
+          data:{labels:labels7,datasets:[{label:'Tasks Completed',data:data7,backgroundColor:'orange'}]},
+          options:{responsive:true,scales:{y:{beginAtZero:true,precision:0}}}
+        });
+      }
+      // Monthly Chart
       const mCtx=document.getElementById('monthlyChart').getContext('2d');
-      if(monthlyChart) monthlyChart.data.labels=labelsM, monthlyChart.data.datasets[0].data=dataM, monthlyChart.update();
-      else monthlyChart=new Chart(mCtx,{
-        type:'bar',
-        data:{
-          labels:labelsM,
-          datasets:[{label:'Tasks Completed',data:dataM,backgroundColor:'orange'}]
-        },
-        options:{responsive:true,scales:{y:{beginAtZero:true,precision:0}}}
-      });
+      if(monthlyChart){
+        monthlyChart.data.labels=labelsM; monthlyChart.data.datasets[0].data=dataM; monthlyChart.update();
+      } else {
+        monthlyChart=new Chart(mCtx,{
+          type:'bar',
+          data:{labels:labelsM,datasets:[{label:'Tasks Completed',data:dataM,backgroundColor:'orange'}]},
+          options:{responsive:true,scales:{y:{beginAtZero:true,precision:0}}}
+        });
+      }
     }
     function toggleAnalytics(show=null){
       const modal=document.getElementById('analyticsModal'),
-            overlay=document.getElementById('analyticsOverlay'),
+            ov=document.getElementById('analyticsOverlay'),
             isVis=modal.style.display==='block',
             should=show===null?!isVis:show;
       if(should) renderAnalytics();
       modal.style.display=should?'block':'none';
-      overlay.style.display=should?'block':'none';
+      ov.style.display=should?'block':'none';
     }
 
-    // ——— INITIALIZE ———
+    // ——— INIT ———
     document.getElementById('importInput').addEventListener('change',importTrackerData);
     document.getElementById('pomStartBtn').addEventListener('click',()=>{
       if(!pomRunning){ pomRunning=true; document.getElementById('pomStartBtn').textContent='Running'; startWorkPhase(); }
