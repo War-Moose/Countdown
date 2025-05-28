@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Daily Task Tracker v1.2 (Refactored)</title>
+  <title>Daily Task Tracker v1.2</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -10,49 +10,227 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     /* ——— CORE STYLES ——— */
-    body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f0f0f0; color: #000; }
-    body.dark { background-color: #121212; color: #e0e0e0; }
-    .counter { font-size: 1.2em; margin: 5px; }
-    button { font-size: 1.2em; padding: 10px 20px; margin: 10px; cursor: pointer; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #f0f0f0;
+      color: #000;
+    }
+    body.dark {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    .counter {
+      font-size: 1.2em;
+      margin: 5px;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
 
     /* ——— CALENDAR ——— */
-    .calendar { display: grid; grid-template-columns: repeat(7, 40px); gap: 4px; justify-content: center; margin-top: 20px; }
-    .day { width: 40px; height: 40px; border: 1px solid #999; display: flex; align-items: center; justify-content: center; font-size: 0.8em; }
-    .white { background-color: white; color: black; }
-    .red   { background-color: red;   color: white; }
-    .blue  { background-color: blue;  color: white; }
-    .black { background-color: black; color: white; }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 40px);
+      gap: 4px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .day {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8em;
+    }
+    .day.white { background-color: white; color: black; }
+    .day.red   { background-color: red;   color: white; }
+    .day.blue  { background-color: blue;  color: white; }
+    .day.black { background-color: black; color: white; }
 
     /* ——— TITLE & BADGES ——— */
-    #title-container { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-    .title-badge { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; cursor: pointer; }
+    #title-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .title-badge {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
 
     /* ——— SETTINGS MENU ——— */
-    #menuOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 999; }
-    #settingsMenu { display: none; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -20%); background: rgba(0, 0, 0, 0.8); color: white; padding: 30px; border-radius: 10px; z-index: 1000; text-align: center; width: 80%; max-width: 300px; }
-    #settingsMenu button, #settingsMenu select { display: block; width: 80%; margin: 10px auto; font-size: 1em; padding: 8px; }
+    #menuOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+    #settingsMenu {
+      display: none;
+      position: fixed;
+      top: 20%; left: 50%;
+      transform: translate(-50%, -20%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      z-index: 1000;
+      text-align: center;
+      width: 80%;
+      max-width: 300px;
+    }
+    #settingsMenu button,
+    #settingsMenu select {
+      display: block;
+      width: 80%;
+      margin: 10px auto;
+      font-size: 1em;
+      padding: 8px;
+    }
 
     /* ——— BADGE MODAL ——— */
-    #badgeModal { display: none; position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 20px; border-radius: 10px; z-index: 2000; max-width: 600px; text-align: center; }
-    #badgeGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; justify-items: center; margin-top: 20px; }
-    #badgePopup { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 15px 30px; border-radius: 8px; z-index: 3000; box-shadow: 0 0 10px #000; font-weight: bold; }
+    #badgeModal {
+      display: none;
+      position: fixed;
+      top: 10%; left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 2000;
+      max-width: 600px;
+      text-align: center;
+    }
+    #badgeGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 15px;
+      justify-items: center;
+      margin-top: 20px;
+    }
+    #badgePopup {
+      display: none;
+      position: fixed;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 15px 30px;
+      border-radius: 8px;
+      z-index: 3000;
+      box-shadow: 0 0 10px #000;
+      font-weight: bold;
+    }
 
     /* ——— STREAK GLOW ——— */
-    @keyframes streakPop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-    .streak-boost { animation: streakPop 0.8s ease-in-out; color: orange; text-shadow: 0 0 8px orange, 0 0 12px black; }
+    @keyframes streakPop {
+      0% { transform: scale(1) }
+      50% { transform: scale(1.3) }
+      100% { transform: scale(1) }
+    }
+    .streak-boost {
+      animation: streakPop 0.8s ease-in-out;
+      color: orange;
+      text-shadow: 0 0 8px orange, 0 0 12px black;
+    }
 
     /* ——— POMODORO ——— */
-    #pomodoroOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 3500; }
-    .pom-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; color: #000; padding: 20px; border-radius: 8px; z-index: 4000; box-shadow: 0 0 10px rgba(0,0,0,0.5); text-align: center; width: 200px; }
-    body.dark .pom-modal { background: #333; color: #e0e0e0; }
-    #pomProgressContainer { position: relative; width: 140px; height: 140px; margin: 20px auto; border-radius: 50%; background: conic-gradient(black 0%, black 100%); }
-    #pomTimerDisplay { position: absolute; width: 100%; height: 100%; top: 0; left: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+    #pomodoroOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 3500;
+    }
+    .pom-modal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 8px;
+      z-index: 4000;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      text-align: center;
+      width: 200px;
+    }
+    body.dark .pom-modal {
+      background: #333;
+      color: #e0e0e0;
+    }
+    #pomProgressContainer {
+      position: relative;
+      width: 140px; height: 140px;
+      margin: 20px auto;
+      border-radius: 50%;
+      background: conic-gradient(black 0%, black 100%);
+    }
+    #pomTimerDisplay {
+      position: absolute;
+      width: 100%; height: 100%;
+      top: 0; left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+    }
 
     /* ——— ANALYTICS ——— */
-    #analyticsOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 3500; }
-    .analytics-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; color: #000; padding: 20px; border-radius: 8px; z-index: 4000; box-shadow: 0 0 10px rgba(0,0,0,0.5); width: 90%; max-width: 600px; text-align: center; overflow-y: auto; max-height: 90vh; }
-    body.dark .analytics-modal { background: #333; color: #e0e0e0; }
-    .chart-nav { display: flex; justify-content: center; align-items: center; margin-bottom: 8px; }
+    #analyticsOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 3500;
+    }
+    .analytics-modal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 8px;
+      z-index: 4000;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+    body.dark .analytics-modal {
+      background: #333;
+      color: #e0e0e0;
+    }
+    .analytics-modal h2 { margin-top: 0; }
+    .chart-nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 8px;
+    }
     .chart-nav button { margin: 0 10px; }
     .chart-label { font-weight:bold; margin: 0 8px; }
     .chart-container { width:100%; margin:20px 0; }
@@ -75,436 +253,711 @@
   <p class="counter">Longest Streak: <span id="longestStreak"></span> days</p>
 
   <!-- MAIN CONTROLS -->
-  <button id="btn-complete">Complete Task</button>
-  <button id="btn-reset-day">Reset Day</button>
-  <button data-action="changeDay" data-offset="-1">-1 Day</button>
-  <button data-action="changeDay" data-offset="1">+1 Day</button>
-  <button id="btn-export">Save Backup</button>
+  <button onclick="completeTask()">Complete Task</button>
+  <button onclick="resetDay()">Reset Day</button>
+  <button onclick="advanceDay(-1)">-1 Day</button>
+  <button onclick="advanceDay(1)">+1 Day</button>
+  <button onclick="exportTrackerData()">Save Backup</button>
   <input type="file" id="importInput" accept=".json" style="display:none"/>
-  <button id="btn-import">Import Backup</button>
-  <button data-toggle="menu">Menu</button>
-  <button data-toggle="pomodoro">Pomodoro</button>
-  <button data-toggle="analytics">Analytics</button>
+  <button onclick="document.getElementById('importInput').click()">Import Backup</button>
+  <button onclick="toggleMenu()">Menu</button>
+  <button onclick="togglePomodoro()">Pomodoro</button>
+  <button onclick="toggleAnalytics()">Analytics</button>
 
   <!-- CALENDAR -->
   <div class="calendar" id="calendar"></div>
 
   <!-- SETTINGS MENU -->
-  <div id="menuOverlay" onclick="toggleModal('settingsMenu','menuOverlay')"></div>
+  <div id="menuOverlay" onclick="toggleMenu(false)"></div>
   <div id="settingsMenu">
-    <h2>Settings Menu</h2>
     <select id="selectLeftBadge"></select>
     <select id="selectRightBadge"></select>
-    <button onclick="toggleModal('badgeModal','menuOverlay')">Badges</button>
-    <button id="btn-reset-badges">Reset Badges</button>
-    <button id="btn-reset-total">Reset Total Tasks</button>
-    <button data-action="changeDay" data-offset="-1">-1 Day</button>
-    <button data-action="changeDay" data-offset="1">+1 Day</button>
-    <button id="btn-toggle-dark">Toggle Dark Mode</button>
-    <button onclick="toggleModal('settingsMenu','menuOverlay')">Close</button>
+    <button onclick="toggleBadgeModal()">Badges</button>
+    <button onclick="resetBadges()">Reset Badges</button>
+    <h2>Settings Menu</h2>
+    <button onclick="resetTotalTasks()">Reset Total Tasks</button>
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <button onclick="resetDay()">Reset Day</button>
+    <button onclick="advanceDay(-1)">-1 Day</button>
+    <button onclick="advanceDay(1)">+1 Day</button>
+    <button onclick="toggleMenu(false)">Close</button>
   </div>
 
   <!-- BADGE MODAL -->
   <div id="badgeModal">
     <h2>Achievements</h2>
     <div id="badgeGrid"></div>
-    <button onclick="toggleModal('badgeModal','menuOverlay')">Close</button>
+    <button onclick="toggleBadgeModal(false)">Close</button>
   </div>
   <div id="badgePopup"></div>
 
   <!-- POMODORO MODAL -->
-  <div id="pomodoroOverlay" onclick="toggleModal('pomodoroModal','pomodoroOverlay',resetPom**)"></div>
+  <div id="pomodoroOverlay" onclick="togglePomodoro(false)"></div>
   <div id="pomodoroModal" class="pom-modal">
     <h2>Pomodoro Timer</h2>
     <div id="pomProgressContainer">
       <div id="pomTimerDisplay">25:00</div>
     </div>
     <button id="pomStartBtn">Start Pomodoro</button>
-    <button onclick="toggleModal('pomodoroModal','pomodoroOverlay',resetPom)">Close</button>
+    <button onclick="togglePomodoro(false)">Close</button>
   </div>
 
   <!-- ANALYTICS MODAL -->
-  <div id="analyticsOverlay" onclick="toggleModal('analyticsModal','analyticsOverlay')"></div>
+  <div id="analyticsOverlay" onclick="toggleAnalytics(false)"></div>
   <div id="analyticsModal" class="analytics-modal">
     <h2>Weekly • Monthly • Year Analytics</h2>
+
     <div class="chart-nav">
-      <button id="week-prev">←</button>
+      <button onclick="changeWeek(-1)">&larr;</button>
       <span id="weeklyLabel" class="chart-label"></span>
-      <button id="week-next">→</button>
+      <button onclick="changeWeek(1)">&rarr;</button>
     </div>
-    <div class="chart-container"><canvas id="weeklyChart"></canvas></div>
+    <div class="chart-container">
+      <canvas id="weeklyChart"></canvas>
+    </div>
+
     <div class="chart-nav">
-      <button id="month-prev">←</button>
+      <button onclick="changeMonth(-1)">&larr;</button>
       <span id="monthlyLabel" class="chart-label"></span>
-      <button id="month-next">→</button>
+      <button onclick="changeMonth(1)">&rarr;</button>
     </div>
-    <div class="chart-container"><canvas id="monthlyChart"></canvas></div>
+    <div class="chart-container">
+      <canvas id="monthlyChart"></canvas>
+    </div>
+
     <div class="chart-nav">
-      <button id="year-prev">←</button>
+      <button onclick="changeYear(-1)">&larr;</button>
       <span id="yearLabel" class="chart-label"></span>
-      <button id="year-next">→</button>
+      <button onclick="changeYear(1)">&rarr;</button>
     </div>
-    <div class="chart-container"><canvas id="yearChart"></canvas></div>
-    <button onclick="toggleModal('analyticsModal','analyticsOverlay')">Close</button>
+    <div class="chart-container">
+      <canvas id="yearChart"></canvas>
+    </div>
+
+    <button onclick="toggleAnalytics(false)">Close</button>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // ——— HELPERS ———
-      const parseDate = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
-      const formatDate = dt => dt.toISOString().slice(0,10);
-      const addDays = (d,n) => { const r=new Date(d); r.setDate(r.getDate()+n); return r; };
-      const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-      const store = { get: (k,d)=>{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }, set: (k,v)=>localStorage.setItem(k,JSON.stringify(v)) };
+    // ——— HELPERS ———
+    function parseDate(str) {
+      const [y,m,d] = str.split('-').map(Number);
+      return new Date(y, m-1, d);
+    }
+    function formatDate(dt) {
+      const y = dt.getFullYear(),
+            mo = String(dt.getMonth()+1).padStart(2,'0'),
+            da = String(dt.getDate()).padStart(2,'0');
+      return ${y}-${mo}-${da};
+    }
+    function addDays(dt, n) {
+      const r = new Date(dt);
+      r.setDate(r.getDate() + n);
+      return r;
+    }
+    const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-      // ——— STATE ———
-      const defaultTasks = 3;
-      let today = formatDate(new Date());
-      const state = {
-        tasksLeft:      store.get('tasksLeft', defaultTasks),
-        tasksDone:      store.get('tasksDone', 0),
-        totalTasksDone: store.get('totalTasksDone', 0),
-        streak:         store.get('streak', 0),
-        longestStreak:  store.get('longestStreak', 0),
-        taskLog:        store.get('taskLog', {}),
-        badges:         store.get('badges', [
-          { id:'badge_first',   name:'First Task',   desc:'Complete 1 task',        unlocked:false },
-          { id:'badge_five',    name:'Five Tasks',   desc:'Complete 5 total tasks', unlocked:false },
-          { id:'badge_streak3', name:'3-Day Streak', desc:'Achieve a 3-day streak', unlocked:false }
-        ]),
-        savedDate:      store.get('taskDate', '')
-      };
+    // ——— CORE STATE & STORAGE ———
+    const defaultTasks = 3;
+    let today         = formatDate(new Date());
+    let tasksLeft      = parseInt(localStorage.getItem("tasksLeft"))      || defaultTasks;
+    let tasksDone      = parseInt(localStorage.getItem("tasksDone"))      || 0;
+    let totalTasksDone = parseInt(localStorage.getItem("totalTasksDone")) || 0;
+    let streak         = parseInt(localStorage.getItem("streak"))         || 0;
+    let longestStreak  = parseInt(localStorage.getItem("longestStreak"))  || 0;
+    const taskLog      = JSON.parse(localStorage.getItem("taskLog")   || "{}");
+    let savedDate      = localStorage.getItem("taskDate");
 
-      // Daily reset on new day
-      if (state.savedDate !== today) {
-        state.tasksLeft = defaultTasks;
-        state.tasksDone = 0;
-        state.savedDate = today;
-        localStorage.removeItem('streakLastCounted');
-        store.set('tasksLeft', state.tasksLeft);
-        store.set('tasksDone', state.tasksDone);
-        store.set('taskDate', today);
-      }
+    // On new day, reset tasks and clear streak‐count flag
+    if (savedDate !== today) {
+      tasksDone = 0;
+      tasksLeft = defaultTasks;
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("taskDate", today);
+      localStorage.removeItem("streakLastCounted");
+    }
 
-      // Persist selected keys
-      const save = keys => keys.forEach(k => store.set(k, state[k]));
+    // ——— BADGES INIT ———
+    let badges = JSON.parse(localStorage.getItem("badges"));
+    if (!Array.isArray(badges) || badges.length !== 3) {
+      badges = [
+        { id:"badge_first",   name:"First Task",   description:"Complete 1 task",        unlocked:false },
+        { id:"badge_five",    name:"Five Tasks",   description:"Complete 5 total tasks", unlocked:false },
+        { id:"badge_streak3", name:"3-Day Streak", description:"Achieve a 3-day streak", unlocked:false }
+      ];
+      localStorage.setItem("badges", JSON.stringify(badges));
+    }
 
-      // ——— STREAK LOGIC ———
-      function calcLongest() {
-        const dates = Object.keys(state.taskLog).filter(d => state.taskLog[d] >= defaultTasks).sort();
-        let max=0,count=0,prev;
-        dates.forEach(d => {
-          count = (prev && (parseDate(d)-parseDate(prev))/86400000===1)? count+1 : 1;
-          max = Math.max(max, count);
-          prev = d;
-        });
-        return max;
-      }
-      function updateStreak() {
-        const yesterday = formatDate(addDays(parseDate(today), -1));
-        if (!(state.taskLog[yesterday] >= defaultTasks)) state.streak = 0;
-        if (state.taskLog[today] === defaultTasks && localStorage.getItem('streakLastCounted') !== today) {
-          state.streak++;
-          localStorage.setItem('streakLastCounted', today);
+    // ——— STREAK LOGIC ———
+    function calculateLongestStreak() {
+      const doneDates = Object.keys(taskLog)
+        .filter(d => taskLog[d] >= defaultTasks)
+        .sort();
+      let maxS = 0, temp = 0, prev = null;
+      doneDates.forEach(iso => {
+        if (prev) {
+          const diff = Math.round((new Date(iso) - new Date(prev)) / 86400000);
+          temp = (diff === 1 ? temp + 1 : 1);
+        } else {
+          temp = 1;
         }
-        state.longestStreak = calcLongest();
-        save(['streak','longestStreak']);
+        maxS = Math.max(maxS, temp);
+        prev = iso;
+      });
+      return maxS;
+    }
+
+    function updateStreakFromCalendar() {
+      // 1) Check yesterday
+      const y = parseDate(today);
+      y.setDate(y.getDate() - 1);
+      const prevKey  = formatDate(y);
+      const prevDone = (taskLog[prevKey] || 0) >= defaultTasks;
+
+      // 2) Reset if missed yesterday
+      if (!prevDone) streak = 0;
+
+      // 3) Count tasks done today
+      const countToday = taskLog[today] || 0;
+
+      // 4) Only bump when hitting exactly defaultTasks, once
+      if (
+        countToday === defaultTasks &&
+        localStorage.getItem("streakLastCounted") !== today
+      ) {
+        streak++;
+        localStorage.setItem("streakLastCounted", today);
       }
 
-      // ——— BADGES ———
-      function showPopup(msg) {
-        const p = document.getElementById('badgePopup');
-        p.textContent = msg;
-        p.style.display = 'block';
-        setTimeout(() => p.style.display = 'none', 3000);
-      }
-      function checkBadges() {
-        let updated = false;
-        state.badges.forEach(b => {
-          if (!b.unlocked && (
-            (b.id === 'badge_first'   && state.totalTasksDone >= 1) ||
-            (b.id === 'badge_five'    && state.totalTasksDone >= 5) ||
-            (b.id === 'badge_streak3' && state.streak >= 3)
-          )) {
-            b.unlocked = true;
-            showPopup(`🏆 Badge Unlocked: ${b.name}!`);
-            updated = true;
+      // 5) Recompute longest streak
+      longestStreak = calculateLongestStreak();
+
+      // 6) Persist
+      localStorage.setItem("streak", streak);
+      localStorage.setItem("longestStreak", longestStreak);
+    }
+
+    // ——— BADGES ———
+    function checkBadges() {
+      let updated = false;
+      badges.forEach(b => {
+        if (!b.unlocked) {
+          if (b.id === "badge_first" && totalTasksDone >= 1) {
+            b.unlocked = true; showBadgePopup(b.name); updated = true;
           }
-        });
-        if (updated) store.set('badges', state.badges);
-      }
-      function renderBadgesGrid() {
-        const grid = document.getElementById('badgeGrid');
-        grid.innerHTML = '';
-        state.badges.forEach(b => {
-          const div = document.createElement('div');
-          div.style.opacity = b.unlocked ? 1 : 0.3;
-          div.style.cursor = 'pointer';
-          div.innerHTML = `<div style="font-size:2em;">🏅</div><div style="font-size:0.8em;">${b.name}</div>`;
-          div.onclick = () => alert(b.unlocked ? b.desc : `Locked: ${b.desc}`);
-          grid.appendChild(div);
-        });
-      }
-
-      // ——— CALENDAR ———
-      function drawCalendar() {
-        const cal = document.getElementById('calendar'); cal.innerHTML = '';
-        const ref = parseDate(today), Y = ref.getFullYear(), M = ref.getMonth();
-        const firstDay = new Date(Y, M, 1).getDay();
-        for (let i = 0; i < firstDay; i++) {
-          const empty = document.createElement('div'); empty.className = 'day'; empty.style.visibility = 'hidden';
-          cal.appendChild(empty);
+          else if (b.id === "badge_five" && totalTasksDone >= 5) {
+            b.unlocked = true; showBadgePopup(b.name); updated = true;
+          }
+          else if (b.id === "badge_streak3" && streak >= 3) {
+            b.unlocked = true; showBadgePopup(b.name); updated = true;
+          }
         }
-        const dim = new Date(Y, M+1, 0).getDate();
-        for (let d = 1; d <= dim; d++) {
-          const key = formatDate(new Date(Y, M, d));
-          const v = state.taskLog[key] || 0;
-          const box = document.createElement('div');
-          box.className = `day ${['white','red','blue','black'][Math.min(v,3)]}`;
-          box.textContent = d;
-          cal.appendChild(box);
-        }
+      });
+      if (updated) {
+        localStorage.setItem("badges", JSON.stringify(badges));
       }
+    }
+    function initializeBadges() {
+      const grid = document.getElementById("badgeGrid");
+      grid.innerHTML = "";
+      badges.forEach(b => {
+        const div = document.createElement("div");
+        div.style.opacity = b.unlocked ? "1" : "0.3";
+        div.style.cursor = "pointer";
+        div.innerHTML = 
+          <div style="font-size:2em;">🏅</div>
+          <div style="font-size:0.8em;">${b.name}</div>
+        ;
+        div.onclick = () => alert(b.unlocked ? b.description : Locked: ${b.description});
+        grid.appendChild(div);
+      });
+    }
 
-      // ——— TITLE BADGES ———
-      function updateTitleBadges() {
-        const map = Object.fromEntries(state.badges.map(b => [b.id, b]));
-        ['Left','Right'].forEach(pos => {
-          const stored = localStorage.getItem(`titleBadge${pos}`);
-          const el = document.getElementById(`badge${pos}`);
-          if (map[stored]) { el.textContent = '🏅'; el.title = map[stored].name; }
-          else { el.textContent = ''; el.title = ''; }
-        });
+    // ——— DRAW CALENDAR ———
+    function drawCalendar() {
+      const cal = document.getElementById("calendar");
+      cal.innerHTML = "";
+      const ref = parseDate(today);
+      const Y = ref.getFullYear(), M = ref.getMonth();
+      const firstDay = new Date(Y, M, 1).getDay();
+      // empty slots to align Sunday-first
+      for (let i = 0; i < firstDay; i++) {
+        const e = document.createElement("div");
+        e.className = "day";
+        e.style.visibility = "hidden";
+        cal.appendChild(e);
       }
-      function initTitleSelectors() {
-        const left = document.getElementById('selectLeftBadge');
-        const right = document.getElementById('selectRightBadge');
-        state.badges.forEach(b => {
-          const optL = document.createElement('option'); optL.value = b.id; optL.textContent = b.name; left.appendChild(optL);
-          const optR = optL.cloneNode(true); right.appendChild(optR);
-        });
-        left.value = localStorage.getItem('titleBadgeLeft') || state.badges[0].id;
-        right.value = localStorage.getItem('titleBadgeRight') || state.badges[1].id;
-        left.onchange = e => { localStorage.setItem('titleBadgeLeft', e.target.value); updateTitleBadges(); };
-        right.onchange = e => { localStorage.setItem('titleBadgeRight', e.target.value); updateTitleBadges(); };
+      const dim = new Date(Y, M+1, 0).getDate();
+      for (let d=1; d<=dim; d++) {
+        const key = formatDate(new Date(Y, M, d));
+        const v   = taskLog[key] || 0;
+        const box = document.createElement("div");
+        box.className = "day " + (
+          v===0 ? "white" :
+          v===1 ? "red" :
+          v===2 ? "blue" : "black"
+        );
+        box.textContent = d;
+        cal.appendChild(box);
       }
+    }
 
-      // ——— MODAL TOGGLE ———
-      function toggleModal(modalId, overlayId, cleanup) {
-        const m = document.getElementById(modalId), o = document.getElementById(overlayId);
-        const show = m.style.display !== 'block';
-        m.style.display = show ? 'block' : 'none';
-        o.style.display = show ? 'block' : 'none';
-        if (!show && typeof cleanup === 'function') cleanup();
+    // ——— TITLE BADGES ———
+    function updateTitleBadges() {
+      const leftId  = localStorage.getItem("titleBadgeLeft"),
+            rightId = localStorage.getItem("titleBadgeRight"),
+            map     = Object.fromEntries(badges.map(b => [b.id, b])),
+            leftEl  = document.getElementById("badgeLeft"),
+            rightEl = document.getElementById("badgeRight");
+      if (map[leftId]) {
+        leftEl.textContent = "🏅";
+        leftEl.title = map[leftId].name;
+      } else {
+        leftEl.textContent = "";
       }
-
-      // ——— TASK & CONTROLS ———
-      function updateDisplays() {
-        document.getElementById('currentDate').textContent = today;
-        document.getElementById('tasksLeft').textContent  = state.tasksLeft;
-        document.getElementById('tasksDone').textContent  = state.tasksDone;
-        document.getElementById('totalTasksDone').textContent = state.totalTasksDone;
-        updateStreak();
-        document.getElementById('streak').textContent      = state.streak;
-        document.getElementById('longestStreak').textContent = state.longestStreak;
-        drawCalendar();
-        checkBadges();
-        renderBadgesGrid();
+      if (map[rightId]) {
+        rightEl.textContent = "🏅";
+        rightEl.title = map[rightId].name;
+      } else {
+        rightEl.textContent = "";
+      }
+    }
+    function initTitleBadgeSelectors() {
+      const selL = document.getElementById("selectLeftBadge"),
+            selR = document.getElementById("selectRightBadge");
+      badges.forEach(b => {
+        const o1 = document.createElement("option");
+        o1.value = b.id;
+        o1.textContent = b.name;
+        selL.appendChild(o1);
+        selR.appendChild(o1.cloneNode(true));
+      });
+      selL.value = localStorage.getItem("titleBadgeLeft") || badges[0].id;
+      selR.value = localStorage.getItem("titleBadgeRight") || badges[1].id;
+      selL.onchange = e => {
+        localStorage.setItem("titleBadgeLeft", e.target.value);
         updateTitleBadges();
-      }
+      };
+      selR.onchange = e => {
+        localStorage.setItem("titleBadgeRight", e.target.value);
+        updateTitleBadges();
+      };
+    }
 
-      document.getElementById('btn-complete').addEventListener('click', () => {
-        if (state.tasksLeft > 0) state.tasksLeft--;
-        state.tasksDone++;
-        state.totalTasksDone++;
-        state.taskLog[today] = state.tasksDone;
-        save(['tasksLeft','tasksDone','totalTasksDone','taskLog']);
-        const prevSt = state.streak, prevLg = state.longestStreak;
-        updateDisplays();
-        ['streak','longestStreak'].forEach(id => {
-          const el = document.getElementById(id);
-          if (state[id] > (id === 'streak' ? prevSt : prevLg)) {
-            el.classList.add('streak-boost');
-            setTimeout(() => el.classList.remove('streak-boost'), 800);
-          }
-        });
-        if (state.tasksDone >= defaultTasks) {
-          confetti({ particleCount: 100, spread: 60, origin: { y: 0.6 }, colors: ['#000','#FFA500'] });
-        }
-      });
+    // ——— UPDATE ALL DISPLAYS ———
+    function updateDisplays() {
+      document.getElementById("currentDate").textContent = today;
+      document.getElementById("tasksLeft").textContent   = tasksLeft;
+      document.getElementById("tasksDone").textContent   = tasksDone;
+      document.getElementById("totalTasksDone").textContent = totalTasksDone;
+      updateStreakFromCalendar();
+      document.getElementById("streak").textContent      = streak;
+      document.getElementById("longestStreak").textContent = longestStreak;
+      drawCalendar();
+      checkBadges();
+      initializeBadges();
+      updateTitleBadges();
+    }
 
-      document.getElementById('btn-reset-day').addEventListener('click', () => {
-        state.tasksDone = 0;
-        state.tasksLeft = defaultTasks;
-        delete state.taskLog[today];
-        save(['tasksDone','tasksLeft','taskLog']);
-        updateDisplays();
-      });
+    // ——— TASK & CONFETTI & GLOW ———
+    function completeTask() {
+      if (tasksLeft > 0) tasksLeft--;
+      tasksDone++; totalTasksDone++;
+      taskLog[today] = tasksDone;
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("totalTasksDone", totalTasksDone);
+      localStorage.setItem("taskLog", JSON.stringify(taskLog));
 
-      document.querySelectorAll('[data-action="changeDay"]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const off = Number(btn.dataset.offset);
-          const d = addDays(parseDate(today), off);
-          today = formatDate(d);
-          if (today !== localStorage.getItem('taskDate')) {
-            state.tasksDone = 0;
-            state.tasksLeft = defaultTasks;
-            localStorage.setItem('taskDate', today);
-            localStorage.removeItem('streakLastCounted');
-          }
-          updateDisplays();
-        });
-      });
-
-      document.getElementById('btn-export').addEventListener('click', () => {
-        const data = {
-          tasksLeft: state.tasksLeft,
-          tasksDone: state.tasksDone,
-          totalTasksDone: state.totalTasksDone,
-          streak: state.streak,
-          longestStreak: state.longestStreak,
-          taskLog: state.taskLog,
-          badges: state.badges
-        };
-        const blob = new Blob([JSON.stringify(data,null,2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `backup-${today}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      });
-
-      document.getElementById('btn-import').addEventListener('click', () => document.getElementById('importInput').click());
-      document.getElementById('importInput').addEventListener('change', e => {
-        const file = e.target.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-          const d = JSON.parse(ev.target.result);
-          Object.assign(state, {
-            tasksLeft: d.tasksLeft ?? state.tasksLeft,
-            tasksDone: d.tasksDone ?? state.tasksDone,
-            totalTasksDone: d.totalTasksDone ?? state.totalTasksDone,
-            streak: d.streak ?? state.streak,
-            longestStreak: d.longestStreak ?? state.longestStreak,
-            taskLog: { ...state.taskLog, ...(d.taskLog || {}) },
-            badges: d.badges || state.badges
-          });
-          save(['tasksLeft','tasksDone','totalTasksDone','streak','longestStreak','taskLog','badges']);
-          localStorage.setItem('taskDate', today);
-          localStorage.removeItem('streakLastCounted');
-          updateDisplays();
-          alert('✅ Imported successfully');
-        };
-        reader.readAsText(file);
-      });
-
-      // ——— RESET FUNCTIONS ———
-      document.getElementById('btn-reset-total').addEventListener('click', () => {
-        state.totalTasksDone = 0;
-        state.badges.forEach(b => { if (b.id === 'badge_first' || b.id === 'badge_five') b.unlocked = false; });
-        save(['totalTasksDone','badges']);
-        updateDisplays();
-        alert('Total tasks and relevant badges reset.');
-      });
-      document.getElementById('btn-reset-badges').addEventListener('click', () => {
-        state.badges.forEach(b => b.unlocked = false);
-        store.set('badges', state.badges);
-        renderBadgesGrid();
-      });
-      document.getElementById('btn-toggle-dark').addEventListener('click', () => {
-        const on = document.body.classList.toggle('dark');
-        store.set('darkMode', on);
-      });
-
-      // ——— POMODORO ———
-      let pomInterval, pomPhase = 'work', pomTime = 25*60, pomRunning = false;
-      function updatePomDisplay() {
-        const m = String(Math.floor(pomTime/60)).padStart(2,'0');
-        const s = String(pomTime%60).padStart(2,'0');
-        document.getElementById('pomTimerDisplay').textContent = `${m}:${s}`;
-      }
-      function updatePomProgress() {
-        const total = pomPhase==='work'?25*60:5*60;
-        const pct = ((total - pomTime)/total)*100;
-        document.getElementById('pomProgressContainer').style.background = `conic-gradient(orange ${pct}%, black ${pct}% 100%)`;
-      }
-      function playTone(duration=0.2) {
-        const osc = new (window.AudioContext||window.webkitAudioContext)().createOscillator();
-        osc.type='sine'; osc.frequency.value=440; osc.connect(osc.context.destination); osc.start(); osc.stop(osc.context.currentTime+duration);
-      }
-      function tickPom() {
-        pomTime--;
-        updatePomDisplay(); updatePomProgress();
-        if (pomTime<=0) {
-          clearInterval(pomInterval);
-          if (pomPhase==='work') { playTone(0.5); startBreak(); } else { playTone(0.5); pomRunning=false; document.getElementById('pomStartBtn').textContent='Start Pomodoro'; }
-        }
-      }
-      function startWork() { pomPhase='work'; pomTime=25*60; updatePomDisplay(); updatePomProgress(); playTone(0.2); pomInterval=setInterval(tickPom,1000); }
-      function startBreak() { pomPhase='break'; pomTime=5*60; updatePomDisplay(); updatePomProgress(); playTone(0.2); pomInterval=setInterval(tickPom,1000); }
-      function resetPom() { if (pomRunning) clearInterval(pomInterval); pomRunning=false; pomPhase='work'; pomTime=25*60; updatePomDisplay(); updatePomProgress(); document.getElementById('pomStartBtn').textContent='Start Pomodoro'; }
-      document.querySelector('[data-toggle="pomodoro"]').addEventListener('click', () => toggleModal('pomodoroModal','pomodoroOverlay',resetPom));
-      document.getElementById('pomStartBtn').addEventListener('click', () => {
-        if (!pomRunning) { pomRunning=true; document.getElementById('pomStartBtn').textContent='Running'; startWork(); }
-      });
-      // Overlay click handled inline via onclick attribute referencing resetPom cleanup
-
-      // ——— ANALYTICS ———
-      let weeklyChart, monthlyChart, yearChart;
-      let wOffset=0, mOffset=0, yOffset=0;
-      function renderAnalytics() {
-        const ref = parseDate(today);
-        // Weekly
-        const baseWeek = addDays(ref, wOffset*7);
-        const sun = addDays(baseWeek, -baseWeek.getDay());
-        const wLabels=[], wData=[];
-        for (let i=0; i<7; i++) { const d=addDays(sun,i); wLabels.push(`${weekdays[d.getDay()]} ${d.getMonth()+1}/${d.getDate()}`); wData.push(state.taskLog[formatDate(d)]||0); }
-        document.getElementById('weeklyLabel').textContent = `Week of ${sun.getMonth()+1}/${sun.getDate()}`;
-        // Monthly
-        const baseMon = new Date(ref.getFullYear(), ref.getMonth()+mOffset, 1);
-        const dim = new Date(baseMon.getFullYear(), baseMon.getMonth()+1, 0).getDate();
-        const mLabels=[], mData=[];
-        for (let d=1; d<=dim; d++) { mLabels.push(String(d)); mData.push(state.taskLog[formatDate(new Date(baseMon.getFullYear(), baseMon.getMonth(), d))]||0); }
-        document.getElementById('monthlyLabel').textContent = baseMon.toLocaleDateString(undefined, { month:'long', year:'numeric' });
-        // Yearly
-        const baseYear = new Date(ref.getFullYear()+yOffset, 0, 1);
-        const yLabels=[], yData=[];
-        for (let mm=0; mm<12; mm++) {
-          yLabels.push(new Date(baseYear.getFullYear(), mm, 1).toLocaleDateString(undefined, { month:'short' }));
-          yData.push(Object.entries(state.taskLog).reduce((sum,[k,v])=>{
-            const dt=parseDate(k);
-            return dt.getFullYear()===baseYear.getFullYear() && dt.getMonth()===mm ? sum+v : sum;
-          },0));
-        }
-        document.getElementById('yearLabel').textContent = baseYear.getFullYear();
-        // Charts
-        function updateChart(chart, ctx, labels, data) {
-          if (chart) { chart.data.labels=labels; chart.data.datasets[0].data=data; chart.update(); }
-          else { return new Chart(ctx, { type:'bar', data:{ labels, datasets:[{ label:'Tasks Completed', data, backgroundColor:'orange' }] }, options:{ responsive:true, scales:{ y:{ beginAtZero:true, precision:0 } } } }); }
-        }
-        weeklyChart  = updateChart(weeklyChart,  document.getElementById('weeklyChart').getContext('2d'),  wLabels, wData);
-        monthlyChart = updateChart(monthlyChart, document.getElementById('monthlyChart').getContext('2d'), mLabels, mData);
-        yearChart    = updateChart(yearChart,    document.getElementById('yearChart').getContext('2d'),    yLabels, yData);
-      }
-      ['week-prev','week-next'].forEach(id => document.getElementById(id).addEventListener('click', () => { wOffset += id==='week-next'?1:-1; renderAnalytics(); }));
-      ['month-prev','month-next'].forEach(id => document.getElementById(id).addEventListener('click', () => { mOffset += id==='month-next'?1:-1; renderAnalytics(); }));
-      ['year-prev','year-next'].forEach(id => document.getElementById(id).addEventListener('click', () => { yOffset += id==='year-next'?1:-1; renderAnalytics(); }));
-      document.querySelector('[data-toggle="analytics"]').addEventListener('click', () => { renderAnalytics(); toggleModal('analyticsModal','analyticsOverlay'); });
-
-      // ——— KEY SHORTCUTS ———
-      document.addEventListener('keydown', e => {
-        if (e.key==='d') document.getElementById('btn-toggle-dark').click();
-        if (e.key==='m') document.querySelector('[data-toggle="menu"]').click();
-      });
-      // Persist dark mode on load
-      if (store.get('darkMode', false)) document.body.classList.add('dark');
-
-      // Initialize
-      initTitleSelectors();
+      const prevStr = streak, prevLong = longestStreak;
       updateDisplays();
+
+      // Glow on streak change
+      if (streak > prevStr) {
+        const el = document.getElementById("streak");
+        el.classList.add("streak-boost");
+        setTimeout(() => el.classList.remove("streak-boost"), 800);
+      }
+      if (longestStreak > prevLong) {
+        const elL = document.getElementById("longestStreak");
+        elL.classList.add("streak-boost");
+        setTimeout(() => elL.classList.remove("streak-boost"), 800);
+      }
+
+      // Confetti once you reach the daily goal
+      if (tasksDone >= defaultTasks) {
+        confetti({
+          particleCount: 100,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#000000','#FFA500']
+        });
+      }
+    }
+
+    function resetDay() {
+      tasksDone = 0;
+      tasksLeft = defaultTasks;
+      delete taskLog[today];
+      localStorage.setItem("tasksDone", tasksDone);
+      localStorage.setItem("tasksLeft", tasksLeft);
+      localStorage.setItem("taskLog", JSON.stringify(taskLog));
+      updateDisplays();
+    }
+
+    function resetTotalTasks() {
+      totalTasksDone = 0;
+      localStorage.setItem("totalTasksDone", 0);
+      // reset only total-based badges
+      badges.forEach(b => {
+        if (b.id === "badge_first" || b.id === "badge_five") {
+          b.unlocked = false;
+        }
+      });
+      localStorage.setItem("badges", JSON.stringify(badges));
+      updateDisplays();
+      alert("Total tasks completed and relevant badges have been reset.");
+    }
+
+    function resetBadges() {
+      badges.forEach(b => b.unlocked = false);
+      localStorage.setItem("badges", JSON.stringify(badges));
+      initializeBadges();
+    }
+
+    function advanceDay(offset) {
+      const d = addDays(parseDate(today), offset);
+      today = formatDate(d);
+      if (today !== localStorage.getItem("taskDate")) {
+        tasksDone = 0;
+        tasksLeft = defaultTasks;
+        localStorage.setItem("tasksDone", tasksDone);
+        localStorage.setItem("tasksLeft", tasksLeft);
+        localStorage.setItem("taskDate", today);
+        // clear streak‐count flag when manually moving days
+        localStorage.removeItem("streakLastCounted");
+      }
+      updateDisplays();
+    }
+
+    function exportTrackerData() {
+      const data = {
+        tasksLeft,
+        tasksDone,
+        totalTasksDone,
+        streak,
+        longestStreak,
+        taskLog,
+        badges
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href = url;
+      a.download = backup-${today}.json;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function importTrackerData(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const data = JSON.parse(e.target.result);
+        tasksLeft      = data.tasksLeft      || tasksLeft;
+        tasksDone      = data.tasksDone      || tasksDone;
+        totalTasksDone = data.totalTasksDone || totalTasksDone;
+        streak         = data.streak         || streak;
+        longestStreak  = data.longestStreak  || longestStreak;
+        Object.assign(taskLog, data.taskLog);
+        badges = data.badges || badges;
+        localStorage.setItem("tasksLeft", tasksLeft);
+        localStorage.setItem("tasksDone", tasksDone);
+        localStorage.setItem("totalTasksDone", totalTasksDone);
+        localStorage.setItem("streak", streak);
+        localStorage.setItem("longestStreak", longestStreak);
+        localStorage.setItem("taskLog", JSON.stringify(taskLog));
+        localStorage.setItem("badges", JSON.stringify(badges));
+        localStorage.setItem("taskDate", today);
+        localStorage.removeItem("streakLastCounted");
+        updateDisplays();
+        alert("✅ Imported successfully");
+      };
+      reader.readAsText(file);
+    }
+
+    function showBadgePopup(name) {
+      const p = document.getElementById("badgePopup");
+      p.textContent = 🏆 Badge Unlocked: ${name}!;
+      p.style.display = "block";
+      setTimeout(() => p.style.display = "none", 3000);
+    }
+
+    // ——— TOGGLERS ———
+    function toggleDarkMode() {
+      const d = document.body.classList.toggle("dark");
+      localStorage.setItem("darkMode", d);
+    }
+
+    function toggleMenu(show = null) {
+      const ov = document.getElementById("menuOverlay"),
+            sm = document.getElementById("settingsMenu"),
+            isVisible = sm.style.display === "block",
+            shouldShow = show === null ? !isVisible : show;
+      ov.style.display = shouldShow ? "block" : "none";
+      sm.style.display = shouldShow ? "block" : "none";
+    }
+
+    function toggleBadgeModal(show = null) {
+      const m = document.getElementById("badgeModal"),
+            isVisible = m.style.display === "block",
+            shouldShow = show === null ? !isVisible : show;
+      m.style.display = shouldShow ? "block" : "none";
+    }
+
+    // ——— BROWN NOISE ———
+    const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    let noiseSource;
+    function startBrownNoise() {
+      const bufSize = 4096;
+      noiseSource = audioCtx.createScriptProcessor(bufSize, 1, 1);
+      let lastOut = 0;
+      noiseSource.onaudioprocess = e => {
+        const out = e.outputBuffer.getChannelData(0);
+        for (let i=0; i<bufSize; i++) {
+          const white = Math.random()*2 - 1;
+          lastOut = (lastOut + 0.02*white)/1.02;
+          out[i] = lastOut * 3.5;
+        }
+      };
+      noiseSource.connect(audioCtx.destination);
+    }
+    function stopAllNoise() {
+      if (noiseSource) {
+        noiseSource.disconnect();
+        if (noiseSource.stop) noiseSource.stop();
+        noiseSource = null;
+      }
+    }
+    function playTone(duration = 0.2) {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = 440;
+      osc.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    // ——— POMODORO ———
+    let pomInterval = null,
+        pomPhase    = 'work',
+        pomTime     = 25 * 60,
+        pomRunning  = false;
+
+    function updatePomTimerDisplay() {
+      const m = String(Math.floor(pomTime/60)).padStart(2,'0');
+      const s = String(pomTime%60).padStart(2,'0');
+      document.getElementById('pomTimerDisplay').textContent = ${m}:${s};
+    }
+
+    function updateProgressRing() {
+      const total = (pomPhase === 'work'?25*60:5*60);
+      const pct   = ((total - pomTime)/total)*100;
+      document.getElementById('pomProgressContainer').style.background =
+        conic-gradient(orange ${pct}%, black ${pct}% 100%);
+    }
+
+    function tickPom() {
+      pomTime--;
+      updatePomTimerDisplay();
+      updateProgressRing();
+      if (pomTime <= 0) {
+        clearInterval(pomInterval);
+        if (pomPhase === 'work') {
+          stopAllNoise();
+          playTone(0.5);
+          startBreakPhase();
+        } else {
+          playTone(0.5);
+          pomRunning = false;
+          document.getElementById('pomStartBtn').textContent = 'Start Pomodoro';
+        }
+      }
+    }
+
+    function startWorkPhase() {
+      pomPhase = 'work';
+      pomTime  = 25 * 60;
+      updatePomTimerDisplay();
+      updateProgressRing();
+      playTone(0.2);
+      startBrownNoise();
+      pomInterval = setInterval(tickPom, 1000);
+    }
+
+    function startBreakPhase() {
+      pomPhase = 'break';
+      pomTime  = 5 * 60;
+      updatePomTimerDisplay();
+      updateProgressRing();
+      playTone(0.2);
+      pomInterval = setInterval(tickPom, 1000);
+    }
+
+    function togglePomodoro(show = null) {
+      const modal = document.getElementById('pomodoroModal'),
+            ov    = document.getElementById('pomodoroOverlay'),
+            isVis = modal.style.display === 'block',
+            should= show === null ? !isVis : show;
+      modal.style.display = should ? 'block' : 'none';
+      ov.style.display    = should ? 'block' : 'none';
+      if (!should && pomRunning) {
+        clearInterval(pomInterval);
+        stopAllNoise();
+        pomRunning = false;
+        document.getElementById('pomStartBtn').textContent = 'Start Pomodoro';
+        pomPhase = 'work';
+        pomTime  = 25 * 60;
+        updatePomTimerDisplay();
+        updateProgressRing();
+      }
+    }
+
+    // ——— ANALYTICS ———
+    let weeklyChart, monthlyChart, yearChart;
+    let weekOffset = 0, monthOffset = 0, yearOffset = 0;
+
+    function changeWeek(delta) {
+      weekOffset += delta;
+      renderAnalytics();
+    }
+    function changeMonth(delta) {
+      monthOffset += delta;
+      renderAnalytics();
+    }
+    function changeYear(delta) {
+      yearOffset += delta;
+      renderAnalytics();
+    }
+
+    function renderAnalytics() {
+      const ref = parseDate(today);
+
+      // Weekly (Sun→Sat)
+      const refWeek = addDays(ref, weekOffset * 7);
+      const startSun = addDays(refWeek, -refWeek.getDay());
+      const labels7 = [], data7 = [];
+      for (let i=0; i<7; i++) {
+        const d = addDays(startSun, i);
+        labels7.push(${weekdays[d.getDay()]} ${d.getMonth()+1}/${d.getDate()});
+        data7.push(taskLog[formatDate(d)] || 0);
+      }
+      document.getElementById('weeklyLabel').textContent =
+        Week of ${startSun.getMonth()+1}/${startSun.getDate()};
+
+      // Monthly (1→N)
+      const refMon = new Date(ref.getFullYear(), ref.getMonth()+monthOffset, 1);
+      const Y = refMon.getFullYear(), M = refMon.getMonth();
+      const dim = new Date(Y, M+1, 0).getDate();
+      const labelsM = [], dataM = [];
+      for (let d=1; d<=dim; d++) {
+        labelsM.push(String(d));
+        dataM.push(taskLog[formatDate(new Date(Y, M, d))] || 0);
+      }
+      document.getElementById('monthlyLabel').textContent =
+        refMon.toLocaleDateString(undefined, { month:'long', year:'numeric' });
+
+      // Yearly (Jan→Dec)
+      const refYear = new Date(ref.getFullYear() + yearOffset, 0, 1);
+      const labelsY = [], dataY = [];
+      for (let m=0; m<12; m++) {
+        const d = new Date(refYear.getFullYear(), m, 1);
+        labelsY.push(d.toLocaleDateString(undefined, { month:'short' }));
+        let sum = 0;
+        Object.entries(taskLog).forEach(([k,v]) => {
+          const dt = parseDate(k);
+          if (dt.getFullYear() === refYear.getFullYear() && dt.getMonth() === m) {
+            sum += v;
+          }
+        });
+        dataY.push(sum);
+      }
+      document.getElementById('yearLabel').textContent = refYear.getFullYear();
+
+      // Render/update weekly chart
+      const wCtx = document.getElementById('weeklyChart').getContext('2d');
+      if (weeklyChart) {
+        weeklyChart.data.labels = labels7;
+        weeklyChart.data.datasets[0].data = data7;
+        weeklyChart.update();
+      } else {
+        weeklyChart = new Chart(wCtx, {
+          type:'bar',
+          data:{ labels:labels7, datasets:[{ label:'Tasks Completed', data:data7, backgroundColor:'orange'}] },
+          options:{ responsive:true, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        });
+      }
+
+      // Monthly chart
+      const mCtx = document.getElementById('monthlyChart').getContext('2d');
+      if (monthlyChart) {
+        monthlyChart.data.labels = labelsM;
+        monthlyChart.data.datasets[0].data = dataM;
+        monthlyChart.update();
+      } else {
+        monthlyChart = new Chart(mCtx, {
+          type:'bar',
+          data:{ labels:labelsM, datasets:[{ label:'Tasks Completed', data:dataM, backgroundColor:'orange'}] },
+          options:{ responsive:true, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        });
+      }
+
+      // Yearly chart
+      const yCtx = document.getElementById('yearChart').getContext('2d');
+      if (yearChart) {
+        yearChart.data.labels = labelsY;
+        yearChart.data.datasets[0].data = dataY;
+        yearChart.update();
+      } else {
+        yearChart = new Chart(yCtx, {
+          type:'bar',
+          data:{ labels:labelsY, datasets:[{ label:'Tasks Completed', data:dataY, backgroundColor:'orange'}] },
+          options:{ responsive:true, scales:{ y:{ beginAtZero:true, precision:0 } } }
+        });
+      }
+    }
+
+    function toggleAnalytics(show = null) {
+      const modal = document.getElementById('analyticsModal'),
+            ov    = document.getElementById('analyticsOverlay'),
+            isVis = modal.style.display === 'block',
+            should= show === null ? !isVis : show;
+      if (should) renderAnalytics();
+      modal.style.display = should ? 'block' : 'none';
+      ov.style.display    = should ? 'block' : 'none';
+    }
+
+    // ——— INITIALIZATION ———
+    document.getElementById('importInput').addEventListener('change', importTrackerData);
+    document.getElementById('pomStartBtn').addEventListener('click', () => {
+      if (!pomRunning) {
+        pomRunning = true;
+        document.getElementById('pomStartBtn').textContent = 'Running';
+        startWorkPhase();
+      }
     });
+    document.addEventListener('keydown', e => {
+      if (e.key.toLowerCase() === 'd') toggleDarkMode();
+      if (e.key.toLowerCase() === 'm') toggleMenu();
+    });
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark');
+    }
+
+    initTitleBadgeSelectors();
+    updateDisplays();
   </script>
 </body>
 </html>
