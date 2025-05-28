@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -347,7 +348,7 @@
       const y = dt.getFullYear(),
             mo = String(dt.getMonth()+1).padStart(2,'0'),
             da = String(dt.getDate()).padStart(2,'0');
-      return ${y}-${mo}-${da};
+      return `${y}-${mo}-${da}`;
     }
     function addDays(dt, n) {
       const r = new Date(dt);
@@ -464,11 +465,11 @@
         const div = document.createElement("div");
         div.style.opacity = b.unlocked ? "1" : "0.3";
         div.style.cursor = "pointer";
-        div.innerHTML = 
+        div.innerHTML = `
           <div style="font-size:2em;">🏅</div>
           <div style="font-size:0.8em;">${b.name}</div>
-        ;
-        div.onclick = () => alert(b.unlocked ? b.description : Locked: ${b.description});
+        `;
+        div.onclick = () => alert(b.unlocked ? b.description : `Locked: ${b.description}`);
         grid.appendChild(div);
       });
     }
@@ -654,7 +655,7 @@
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
       a.href = url;
-      a.download = backup-${today}.json;
+      a.download = `backup-${today}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -690,7 +691,7 @@
 
     function showBadgePopup(name) {
       const p = document.getElementById("badgePopup");
-      p.textContent = 🏆 Badge Unlocked: ${name}!;
+      p.textContent = `🏆 Badge Unlocked: ${name}!`;
       p.style.display = "block";
       setTimeout(() => p.style.display = "none", 3000);
     }
@@ -759,14 +760,14 @@
     function updatePomTimerDisplay() {
       const m = String(Math.floor(pomTime/60)).padStart(2,'0');
       const s = String(pomTime%60).padStart(2,'0');
-      document.getElementById('pomTimerDisplay').textContent = ${m}:${s};
+      document.getElementById('pomTimerDisplay').textContent = `${m}:${s}`;
     }
 
     function updateProgressRing() {
       const total = (pomPhase === 'work'?25*60:5*60);
       const pct   = ((total - pomTime)/total)*100;
       document.getElementById('pomProgressContainer').style.background =
-        conic-gradient(orange ${pct}%, black ${pct}% 100%);
+        `conic-gradient(orange ${pct}%, black ${pct}% 100%)`;
     }
 
     function tickPom() {
@@ -851,11 +852,11 @@
       const labels7 = [], data7 = [];
       for (let i=0; i<7; i++) {
         const d = addDays(startSun, i);
-        labels7.push(${weekdays[d.getDay()]} ${d.getMonth()+1}/${d.getDate()});
+        labels7.push(`${weekdays[d.getDay()]} ${d.getMonth()+1}/${d.getDate()}`);
         data7.push(taskLog[formatDate(d)] || 0);
       }
       document.getElementById('weeklyLabel').textContent =
-        Week of ${startSun.getMonth()+1}/${startSun.getDate()};
+        `Week of ${startSun.getMonth()+1}/${startSun.getDate()}`;
 
       // Monthly (1→N)
       const refMon = new Date(ref.getFullYear(), ref.getMonth()+monthOffset, 1);
